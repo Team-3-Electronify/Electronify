@@ -1,13 +1,20 @@
 package com.femcoders.electronify.product.dto;
 
-import com.femcoders.electronify.product.Product;
-import com.femcoders.electronify.review.dto.ReviewResponse;
 
-import java.util.List;
+import com.femcoders.electronify.product.Product;
+
 
 public class ProductMapper {
     public static Product toEntity(ProductRequest productRequest ){
-        return new Product(productRequest.name(), productRequest.price(), productRequest.imageUrl(), productRequest.featured(), productRequest.categoryId());
+        Product product =  Product.builder()
+                .name(productRequest.name())
+                .price(productRequest.price())
+                .imageUrl(productRequest.imageUrl())
+                .featured(productRequest.featured())
+                .id(productRequest.categoryId())
+                .build();
+
+        return product;
     }
 
     public static ProductResponse fromEntity(Product product){
