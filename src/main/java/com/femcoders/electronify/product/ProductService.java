@@ -8,6 +8,7 @@ import com.femcoders.electronify.review.Review;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -39,8 +40,8 @@ public class ProductService {
     public ProductResponse createNewProduct(ProductRequest productRequest){
        /* Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found")); */
-        Product isExistingProduct = productRepository.findByName(productRequest.name());
-        if (isExistingProduct.isPresent){
+        Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
+        if (isExistingProduct.isPresent()){
             throw new RuntimeException("This product already exist");
         }
         Product newProduct = ProductMapper.toEntity(productRequest);
@@ -51,8 +52,8 @@ public class ProductService {
     public ProductResponse updateProduct (Long id, ProductRequest productRequest){
         /* Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found")); */
-        Product isExistingProduct = productRepository.findByName(productRequest.name());
-        if (isExistingProduct.isPresent && isExistingProduct.getId() != id){
+        Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
+        if (isExistingProduct.isPresent() && !isExistingProduct.get().getId().equals(id)){
             throw new RuntimeException("This product already exist");
         }
 
@@ -90,7 +91,7 @@ public class ProductService {
     }   */
 
     public void deletePRoductById(Long id){
-        Product isExisting = productRepository.findById(idProduct)
+        Product isExisting = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No id product found"));
         productRepository.deleteById(id);
     }
