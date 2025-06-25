@@ -1,7 +1,5 @@
-package com.femcoders.electronify.user;
+package com.femcoders.electronify.user.dto;
 
-import com.femcoders.electronify.user.dto.UserRequest;
-import com.femcoders.electronify.user.dto.UserResponse;
 import com.femcoders.electronify.user.model.User;
 import org.springframework.stereotype.Component;
 

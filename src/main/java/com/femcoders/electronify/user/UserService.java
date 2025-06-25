@@ -1,5 +1,6 @@
 package com.femcoders.electronify.user;
 
+import com.femcoders.electronify.user.dto.UserMapper;
 import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
 import com.femcoders.electronify.user.exceptions.UserNotFoundException;
@@ -39,13 +40,13 @@ public class UserService implements UserDetailsService {
 
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> UserNotFoundException.withId(id));
+                .orElseThrow(() -> new UserNotFoundException(id));
         return userMapper.toDto(user);
     }
 
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> UserNotFoundException.withId(id));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         userMapper.updateEntityFromDto(request, user);
         if (request.password() != null && !request.password().isEmpty()) {
@@ -57,7 +58,7 @@ public class UserService implements UserDetailsService {
 
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw UserNotFoundException.withId(id);
+            throw new UserNotFoundException(id);
         }
         userRepository.deleteById(id);
     }
