@@ -1,9 +1,12 @@
 package com.femcoders.electronify.product;
 
 import com.femcoders.electronify.category.Category;
+import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
+import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
+import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
 import com.femcoders.electronify.review.Review;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +25,7 @@ public class ProductService {
     public List<ProductResponse> getAllProducts(){
         List<Product> products = productRepository.findAll();
         if (products.isEmpty()){
-            throw new RuntimeException("Empty list");
+            throw new EmptyListException();
         }
 
         return products.stream()
@@ -32,7 +35,7 @@ public class ProductService {
 
     public ProductResponse getProductById(Long id){
         Product productById = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No id product found"));
+                .orElseThrow(() -> new NoIdProductFoundException(id));
 
         return ProductMapper.fromEntity(productById);
     }
@@ -42,7 +45,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("NO id category found")); */
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent()){
-            throw new RuntimeException("This product already exist");
+            throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
         }
         Product newProduct = ProductMapper.toEntity(productRequest);
         Product savedProduct = productRepository.save(newProduct);
@@ -54,11 +57,11 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("NO id category found")); */
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent() && !isExistingProduct.get().getId().equals(id)){
-            throw new RuntimeException("This product already exist");
+            throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
         }
 
         Product productById = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No id product found"));
+                .orElseThrow(() -> new NoIdProductFoundException(id));
 
         productById.setName(productRequest.name());
         productById.setPrice(productRequest.price());
@@ -72,7 +75,7 @@ public class ProductService {
 
    /* public Product updateProductStats(Long idProduct){
         Product isExisting = productRepository.findById(idProduct)
-                .orElseThrow(() -> new RuntimeException("No id product found"));
+                .orElseThrow(() -> new NoIdProductFoundException(id)););
 
         List<Review> reviews = isExisting.getReviews();
 
@@ -92,7 +95,7 @@ public class ProductService {
 
     public void deletePRoductById(Long id){
         Product isExisting = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No id product found"));
+                .orElseThrow(() -> new NoIdProductFoundException(id));
         productRepository.deleteById(id);
     }
 
