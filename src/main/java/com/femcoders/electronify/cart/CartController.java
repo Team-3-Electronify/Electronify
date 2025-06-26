@@ -18,4 +18,10 @@ public class CartController {
             @RequestBody CartRequest request) {
         return ResponseEntity.ok(cartService.addToCart(productId, request.quantity()));
     }
+
+    @DeleteMapping("/remove/{productId}")
+    public ResponseEntity<Void> removeFromCart(@PathVariable Long productId) {
+        cartService.removeFromCart(productId);
+        return ResponseEntity.ok().build();
+    }
 }

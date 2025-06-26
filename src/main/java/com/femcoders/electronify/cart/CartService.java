@@ -2,6 +2,7 @@ package com.femcoders.electronify.cart;
 
 import com.femcoders.electronify.cart.dto.CartMapper;
 import com.femcoders.electronify.cart.dto.CartResponse;
+import com.femcoders.electronify.cart.exeptions.CartNotFoundException;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
@@ -45,6 +46,17 @@ public class CartService {
         cartRepository.save(cart);
 
         return CartMapper.cartToResponse(cart);
+    }
+
+    @Transactional
+    public void removeFromCart(Long productId) {
+        User user = getAuthenticatedUser();
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CartNotFoundException(user.getUsername()));
+
+        cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        calculateTotalPrice(cart);
+        cartRepository.save(cart);
     }
 
     private double calculateTotalPrice(Cart cart) {
