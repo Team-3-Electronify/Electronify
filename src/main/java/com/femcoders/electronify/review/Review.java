@@ -1,7 +1,7 @@
 package com.femcoders.electronify.review;
 
 import com.femcoders.electronify.product.Product;
-import com.femcoders.electronify.user.User;
+import com.femcoders.electronify.user.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -28,5 +28,4 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 }
