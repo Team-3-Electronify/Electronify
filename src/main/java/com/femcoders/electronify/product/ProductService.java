@@ -184,7 +184,7 @@ public class ProductService {
         return productRepository.save(isExisting);
     }
 
-    public void deletePRoductById(Long id){
+    public void deleteProductById(Long id){
         Product isExisting = productRepository.findById(id)
                 .orElseThrow(() -> new NoIdProductFoundException(id));
         productRepository.deleteById(id);
