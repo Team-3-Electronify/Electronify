@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     private final CartService cartService;
 
+    @GetMapping
+    public ResponseEntity<CartResponse> getCart() {
+        return ResponseEntity.ok(cartService.getCartByUser());
+    }
+
     @PostMapping("/add/{productId}")
     public ResponseEntity<CartResponse> addToCart(
             @PathVariable Long productId,

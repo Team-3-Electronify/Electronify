@@ -22,6 +22,14 @@ public class CartService {
     private final CartRepository cartRepository;
 
     @Transactional
+    public CartResponse getCartByUser() {
+        User user = getAuthenticatedUser();
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CartNotFoundException(user.getUsername()));
+        return CartMapper.cartToResponse(cart);
+    }
+
+    @Transactional
     public CartResponse addToCart(Long productId, int quantity) {
         User user = getAuthenticatedUser();
 
