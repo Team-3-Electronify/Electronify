@@ -1,13 +1,12 @@
 package com.femcoders.electronify.product;
 
-import com.femcoders.electronify.category.Category;
+import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
-import com.femcoders.electronify.review.Review;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +37,20 @@ public class ProductService {
                 .orElseThrow(() -> new NoIdProductFoundException(id));
 
         return ProductMapper.fromEntity(productById);
+    }
+
+    public List<ProductResponse> getProductsByCategory(CategoryRequest categoryRequest){
+        /* Category isExistingCategory = categoryRepository.findByName(categoryRequest.name())
+                .orElseThrow(() -> new RuntimeException("Category dont exist"));*/
+        List<Product> productsListByCategory = productRepository.getProductsByCategory_Name(categoryRequest.name());
+
+        if (productsListByCategory.isEmpty()){
+            throw new EmptyListException();
+        }
+
+        return productsListByCategory.stream()
+                .map(product -> ProductMapper.fromEntity(product))
+                .toList();
     }
 
     public ProductResponse createNewProduct(ProductRequest productRequest){
