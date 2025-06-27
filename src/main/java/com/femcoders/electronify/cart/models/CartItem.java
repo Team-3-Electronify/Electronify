@@ -1,4 +1,4 @@
-package com.femcoders.electronify.cart;
+package com.femcoders.electronify.cart.models;
 
 import com.femcoders.electronify.product.Product;
 import jakarta.persistence.*;

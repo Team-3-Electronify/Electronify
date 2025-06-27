@@ -1,5 +1,6 @@
-package com.femcoders.electronify.cart;
+package com.femcoders.electronify.cart.repositories;
 
+import com.femcoders.electronify.cart.models.Cart;
 import com.femcoders.electronify.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

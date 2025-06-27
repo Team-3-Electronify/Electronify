@@ -1,7 +1,7 @@
 package com.femcoders.electronify.cart.dto;
 
-import com.femcoders.electronify.cart.Cart;
-import com.femcoders.electronify.cart.CartItem;
+import com.femcoders.electronify.cart.models.Cart;
+import com.femcoders.electronify.cart.models.CartItem;
 
 import java.util.List;
 import java.util.stream.Collectors;
