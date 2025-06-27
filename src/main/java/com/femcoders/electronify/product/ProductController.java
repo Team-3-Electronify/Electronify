@@ -1,5 +1,6 @@
 package com.femcoders.electronify.product;
 
+import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import jakarta.validation.Valid;
@@ -29,6 +30,12 @@ public class ProductController {
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         ProductResponse product = productService.getProductById(id);
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@RequestBody CategoryRequest categoryRequest){
+        List<ProductResponse> products = productService.getProductsByCategory(categoryRequest);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PostMapping
