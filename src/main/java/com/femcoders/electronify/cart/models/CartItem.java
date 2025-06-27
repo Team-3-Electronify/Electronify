@@ -1,11 +1,17 @@
-package com.femcoders.electronify.cart;
+package com.femcoders.electronify.cart.models;
 
 import com.femcoders.electronify.product.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import lombok.*;
 
 @Entity
 @Table(name="cart_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +27,10 @@ public class CartItem {
 
     @Min(1)
     private int quantity;
+
+    public CartItem(Cart cart, Product product, int quantity) {
+        this.cart = cart;
+        this.quantity = quantity;
+        this.product = product;
+    }
 }
