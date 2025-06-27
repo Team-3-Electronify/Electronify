@@ -11,7 +11,6 @@ public class ProductMapper {
                 .price(productRequest.price())
                 .imageUrl(productRequest.imageUrl())
                 .featured(productRequest.featured())
-                .id(productRequest.categoryId())
                 .build();
 
         return product;
