@@ -1,14 +1,13 @@
 package com.femcoders.electronify.product;
 
-import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
+import com.femcoders.electronify.review.Review;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +47,9 @@ public class ProductService {
     public List<ProductResponse> findProductsByFilters(
             Optional<String> productName,
             Optional<Long> categoryId,
-            Optional<String> priceGroup
+            Optional<String> priceGroup,
+            Optional<String> sortByPrice,
+            Optional<String> sortByRating
     ){
         CriteriaBuilder cBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Product> cQuery = cBuilder.createQuery(Product.class);
@@ -63,10 +64,32 @@ public class ProductService {
             cQuery.where(cBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0]))));
         }
 
+        List<Order> orderList = new ArrayList<>();
+
+        sortByPrice.ifPresent(order -> {
+            if (order.equalsIgnoreCase("asc")) {
+                orderList.add(cBuilder.asc(productRoot.get("price")));
+            } else if (order.equalsIgnoreCase("desc")) {
+                orderList.add(cBuilder.desc(productRoot.get("price")));
+            }
+        });
+
+        sortByRating.ifPresent(order -> {
+            if (order.equalsIgnoreCase("asc")) {
+                orderList.add(cBuilder.asc(productRoot.get("rating")));
+            } else if (order.equalsIgnoreCase("desc")) {
+                orderList.add(cBuilder.desc(productRoot.get("rating")));
+            }
+        });
+
+        if (!orderList.isEmpty()) {
+            cQuery.orderBy(orderList);
+        }
+
         List<Product> products = entityManager.createQuery(cQuery).getResultList();
-       /* if (products.isEmpty()) {
+        if (products.isEmpty()) {
             throw new EmptyListException();
-        }*/
+        }
         return products.stream()
                 .map(product -> ProductMapper.fromEntity(product))
                 .toList();
@@ -82,15 +105,7 @@ public class ProductService {
     }
 
     private void filterCategory(Optional<Long> categoryId, CriteriaBuilder cBuilder, Root<Product> productRoot, List<Predicate> predicates) {
-       /* if (categoryId.isPresent() && !categoryRepository.existsById(categoryId.get())) {
-            throw new EntityNotFoundException("The category whith id " + categoryId.get() + " does not exist.");
-        }*/
-
         categoryId.ifPresent(id -> predicates.add(cBuilder.equal(productRoot.get("category").get("id"), id)));
-
-       /* if (products.isEmpty() && categoryId.isPresent()) {
-            throw new EmptyListException();
-        }*/
     }
 
     private void filterPriceGroup(Optional<String> priceGroup, CriteriaBuilder cBuilder, Root<Product> productRoot, List<Predicate> predicates) {
@@ -114,20 +129,6 @@ public class ProductService {
             default:
                 return cBuilder.conjunction();
         }
-    }
-
-    public List<ProductResponse> getProductsByCategory(CategoryRequest categoryRequest){
-        /* Category isExistingCategory = categoryRepository.findByName(categoryRequest.name())
-                .orElseThrow(() -> new RuntimeException("Category dont exist"));*/
-        List<Product> productsListByCategory = productRepository.getProductsByCategory_Name(categoryRequest.name());
-
-        if (productsListByCategory.isEmpty()){
-            throw new EmptyListException();
-        }
-
-        return productsListByCategory.stream()
-                .map(product -> ProductMapper.fromEntity(product))
-                .toList();
     }
 
     public ProductResponse createNewProduct(ProductRequest productRequest){
@@ -163,15 +164,15 @@ public class ProductService {
         return ProductMapper.fromEntity(productById);
     }
 
-   /* public Product updateProductStats(Long idProduct){
+    public Product updateProductStats(Long idProduct){
         Product isExisting = productRepository.findById(idProduct)
-                .orElseThrow(() -> new NoIdProductFoundException(id)););
+                .orElseThrow(() -> new NoIdProductFoundException(idProduct));
 
         List<Review> reviews = isExisting.getReviews();
 
         int updatedReviewCount = reviews.size();
         double averageRating = reviews.stream()
-                .mapToDouble(pr -> pr.getReview().getRating())
+                .mapToDouble(pr -> pr.getRating())
                 .average()
                 .orElse(0.0);
 
@@ -181,7 +182,7 @@ public class ProductService {
         isExisting.setRating(averageRating);
 
         return productRepository.save(isExisting);
-    }   */
+    }
 
     public void deletePRoductById(Long id){
         Product isExisting = productRepository.findById(id)
