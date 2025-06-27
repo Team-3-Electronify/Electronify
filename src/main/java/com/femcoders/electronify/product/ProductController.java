@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
@@ -33,8 +34,12 @@ public class ProductController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@RequestBody CategoryRequest categoryRequest){
-        List<ProductResponse> products = productService.getProductsByCategory(categoryRequest);
+    public ResponseEntity<List<ProductResponse>> getProductsByFilters(@RequestBody Optional<String> name,
+                                                                      @RequestBody Optional<Long> categoryId,
+                                                                      @RequestBody Optional<String> priceGroup,
+                                                                      @RequestBody Optional<String> sortByPrice,
+                                                                      @RequestBody Optional<String> sortByRating){
+        List<ProductResponse> products = productService.findProductsByFilters( name, categoryId, priceGroup, sortByPrice,sortByRating);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
