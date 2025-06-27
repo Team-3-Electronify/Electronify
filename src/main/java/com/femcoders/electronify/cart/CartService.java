@@ -3,6 +3,7 @@ package com.femcoders.electronify.cart;
 import com.femcoders.electronify.cart.dto.CartMapper;
 import com.femcoders.electronify.cart.dto.CartResponse;
 import com.femcoders.electronify.cart.exeptions.CartNotFoundException;
+import com.femcoders.electronify.cart.exeptions.ItemNotFoundException;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
@@ -50,6 +51,28 @@ public class CartService {
             CartItem item = new CartItem(cart, product, quantity);
             cart.getItems().add(item);
         }
+        calculateTotalPrice(cart);
+        cartRepository.save(cart);
+
+        return CartMapper.cartToResponse(cart);
+    }
+
+    @Transactional
+    public CartResponse updateCartItemQuantity(Long productId, int quantity) {
+        User user = getAuthenticatedUser();
+
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CartNotFoundException(user.getUsername()));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoIdProductFoundException(productId));
+
+        CartItem existingItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new ItemNotFoundException(productId));
+
+        existingItem.setQuantity(quantity);
         calculateTotalPrice(cart);
         cartRepository.save(cart);
 
