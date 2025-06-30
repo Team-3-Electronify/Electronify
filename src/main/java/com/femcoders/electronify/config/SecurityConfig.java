@@ -25,12 +25,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/products/**", "/api/categories/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/reviews").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/cart/**").hasAuthority("ROLE_USER")
-                        .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
+                        .hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/products/**", "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/reviews").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/cart/**").hasRole("USER")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(withDefaults())
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
@@ -43,3 +43,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
