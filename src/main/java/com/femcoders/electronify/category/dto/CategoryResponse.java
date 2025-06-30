@@ -1,4 +1,4 @@
 package com.femcoders.electronify.category.dto;
 
-public record CategoryResponse() {
+public record CategoryResponse(Long id, String name) {
 }
