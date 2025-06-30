@@ -36,7 +36,7 @@ public class CategoryService {
         return CategoryMapper.fromEntity(savedCategory);
     }
 
-    public Category updateCategory(Long idCategory, CategoryRequest categoryRequest){
+    public CategoryResponse updateCategory(Long idCategory, CategoryRequest categoryRequest){
         Category isExisting = categoryRepository.findById(idCategory)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + idCategory));
         Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
@@ -44,7 +44,8 @@ public class CategoryService {
             throw new RuntimeException("Category exist");
         }
         isExisting.setName(categoryRequest.name());
-        return categoryRepository.save(isExisting);
+        Category savedCategory = categoryRepository.save(isExisting);
+        return CategoryMapper.fromEntity(savedCategory);
     }
 
     public void deleteCategoryById(Long id){
