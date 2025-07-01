@@ -2,6 +2,7 @@ package com.femcoders.electronify.category;
 
 import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.category.dto.CategoryResponse;
+import com.femcoders.electronify.category.dto.CategoryWithProductsResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,12 @@ public class CategoryController {
     public ResponseEntity<List<CategoryResponse>> getAllCategoryList(){
         List<CategoryResponse> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryWithProductsResponse> getCategoryById(@PathVariable Long id){
+        CategoryWithProductsResponse category = categoryService.findCategoryById(id);
+        return new ResponseEntity<>(category, HttpStatus.OK);
     }
     
     @PostMapping
