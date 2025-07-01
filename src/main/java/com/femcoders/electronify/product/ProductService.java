@@ -11,6 +11,7 @@ import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException
 import com.femcoders.electronify.review.Review;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class ProductService {
     private final EntityManager entityManager;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public List<ProductResponse> findAllProducts(){
         List<Product> products = productRepository.findAll();
         if (products.isEmpty()){
@@ -37,6 +39,7 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional
     public ProductResponse findProductById(Long id){
         Product productById = productRepository.findById(id)
                 .orElseThrow(() -> new NoIdProductFoundException(id));
@@ -44,6 +47,7 @@ public class ProductService {
         return ProductMapper.fromEntity(productById);
     }
 
+    @Transactional
     public List<ProductResponse> findProductsByFilters(
             Optional<String> productName,
             Optional<Long> categoryId,
@@ -112,6 +116,7 @@ public class ProductService {
         priceGroup.ifPresent(group -> predicates.add(createPricePredicate(cBuilder, productRoot.get("price"), group)));
     }
 
+    @Transactional
     private Predicate createPricePredicate(CriteriaBuilder cBuilder, Path<Double> pricePath, String priceGroup) {
         switch (priceGroup) {
             case "Less than 50€":
@@ -131,6 +136,7 @@ public class ProductService {
         }
     }
 
+    @Transactional
     public ProductResponse createNewProduct(ProductRequest productRequest){
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found"));
@@ -143,6 +149,7 @@ public class ProductService {
         return ProductMapper.fromEntity(savedProduct);
     }
 
+    @Transactional
     public ProductResponse updateProduct (Long id, ProductRequest productRequest){
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found"));
@@ -184,6 +191,7 @@ public class ProductService {
         return productRepository.save(isExisting);
     }
 
+    @Transactional
     public void deleteProductById(Long id){
         Product isExisting = productRepository.findById(id)
                 .orElseThrow(() -> new NoIdProductFoundException(id));
