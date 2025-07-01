@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReviewMapper {
-    public Review toEntity(ReviewRequest reviewRequest) {
+    public static  Review toEntity(ReviewRequest reviewRequest) {
         return Review.builder()
                 .rating(reviewRequest.rating())
                 .body(reviewRequest.body())
                 .build();
     }
 
-    public ReviewResponse toResponse(Review review) {
+    public static ReviewResponse toResponse(Review review) {
         return new ReviewResponse(review.getId(), review.getRating(), review.getBody(), review.getProduct().getId());
     }
 }
