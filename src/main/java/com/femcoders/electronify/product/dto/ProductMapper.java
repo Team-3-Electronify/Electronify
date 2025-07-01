@@ -26,8 +26,7 @@ public class ProductMapper {
 
         List<ReviewResponse> reviews = product.getReviews()
                 .stream()
-                .map(Review::getReview)
-                .map(review ->  ReviewMapper.toEntity(review))
+                .map(review ->  ReviewMapper.toResponse(review))
                 .toList();
         return new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getImageUrl(), product.isFeatured(), product.getCategory(), product.getRating(), product.getReviewCount() , reviews);
 
