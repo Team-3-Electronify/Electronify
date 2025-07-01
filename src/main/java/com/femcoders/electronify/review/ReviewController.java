@@ -1,6 +1,5 @@
 package com.femcoders.electronify.review;
 
-
 import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import jakarta.validation.Valid;
@@ -19,21 +18,22 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReviewResponse>> getReviewsByUserIdList(@RequestParam Long userId){
+    @GetMapping("/byUser")
+    public ResponseEntity<List<ReviewResponse>> getReviewsByUserIdList(@RequestParam Long userId) {
         List<ReviewResponse> reviews = reviewService.getReviewsByUserId(userId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReviewResponse>> getReviewsByProductIdList(@RequestParam Long productId){
+    @GetMapping("/byProduct")
+    public ResponseEntity<List<ReviewResponse>> getReviewsByProductIdList(@RequestParam Long productId) {
         List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> postNewReview(@Valid @RequestBody ReviewRequest reviewRequest){
+    public ResponseEntity<ReviewResponse> postNewReview(@Valid @RequestBody ReviewRequest reviewRequest) {
         ReviewResponse newReview = reviewService.createReview(reviewRequest);
         return new ResponseEntity<>(newReview, HttpStatus.CREATED);
     }
 }
+
