@@ -1,4 +1,6 @@
 package com.femcoders.electronify.cart.dto;
 
-public record CartRequest() {
+import jakarta.validation.constraints.Min;
+
+public record CartRequest(@Min(1) int quantity) {
 }
