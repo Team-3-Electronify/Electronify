@@ -34,9 +34,10 @@ INSERT INTO products (id, name, price, image_url, featured, category_id, rating,
 -- Users
 -- Password for both users is 'password123'
 INSERT INTO users (id, username, email, password) VALUES
-(1, 'admin', 'admin@example.com', '$2a$10$VNoiCe5z.i8qKx2nyg26A.zG43TqlHqP1N4.l6y/iwuN9.q3v5FvS'),
-(2, 'user', 'user@example.com', '$2a$10$VNoiCe5z.i8qKx2nyg26A.zG43TqlHqP1N4.l6y/iwuN9.q3v5FvS');
+(1, 'admin', 'admin@example.com', '$2a$10$HsMF2wIVlZAelTWGNHD/r.lbHJemKWx0.HEfqHKHF91CR8R3fDjX2'),
+(2, 'user', 'user@example.com', '$2a$10$HsMF2wIVlZAelTWGNHD/r.lbHJemKWx0.HEfqHKHF91CR8R3fDjX2');
 
+-- User roles
 INSERT INTO user_roles (user_id, roles) VALUES
 (1, 'ADMIN'), -- admin user with ADMIN role
 (2, 'USER'); -- user with USER role

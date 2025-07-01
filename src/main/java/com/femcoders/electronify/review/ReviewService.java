@@ -2,6 +2,7 @@ package com.femcoders.electronify.review;
 
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
+import com.femcoders.electronify.product.ProductService;
 import com.femcoders.electronify.review.dto.ReviewMapper;
 import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
@@ -19,9 +20,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final ReviewMapper reviewMapper;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ProductService productService;
 
     @Transactional
     public ReviewResponse createReview(ReviewRequest request) {
@@ -29,12 +30,12 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.productId()));
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.userId()));
-        Review review = reviewMapper.toEntity(request);
+        Review review = ReviewMapper.toEntity(request);
         review.setProduct(product);
         review.setUser(user);
         Review savedReview = reviewRepository.save(review);
-//        updateProductStats(product);
-        return reviewMapper.toResponse(savedReview);
+        productService.updateProductStats(request.productId());
+        return ReviewMapper.toResponse(savedReview);
     }
 
     @Transactional
@@ -43,7 +44,7 @@ public class ReviewService {
             throw new RuntimeException("Product not found with id: " + productId);
         }
         return reviewRepository.findByProduct_Id(productId).stream()
-                .map(reviewMapper::toResponse)
+                .map(ReviewMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -53,16 +54,8 @@ public class ReviewService {
             throw new RuntimeException("User not found with id: " + userId);
         }
         return reviewRepository.findByUser_Id(userId).stream()
-                .map(reviewMapper::toResponse)
+                .map(ReviewMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-//    private void updateProductStats(Product product) {
-//        List<Review> reviews = reviewRepository.findByProduct_Id(product.getId());
-//        double averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
-//        double roundedRating = Math.round(averageRating * 10.0) / 10.0;
-//        product.setReviewCount(reviews.size());
-//        product.setRating(Math.min(roundedRating, 5.0));
-//        productRepository.save(product);
-//    }
 }

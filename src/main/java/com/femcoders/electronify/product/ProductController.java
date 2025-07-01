@@ -1,5 +1,6 @@
 package com.femcoders.electronify.product;
 
+import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
@@ -21,14 +23,24 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAllProductsList(){
-        List<ProductResponse> products = productService.getAllProducts();
+        List<ProductResponse> products = productService.findAllProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse product = productService.getProductById(id);
+        ProductResponse product = productService.findProductById(id);
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProductResponse>> getProductsByFilters(@RequestBody Optional<String> name,
+                                                                      @RequestBody Optional<Long> categoryId,
+                                                                      @RequestBody Optional<String> priceGroup,
+                                                                      @RequestBody Optional<String> sortByPrice,
+                                                                      @RequestBody Optional<String> sortByRating){
+        List<ProductResponse> products = productService.findProductsByFilters( name, categoryId, priceGroup, sortByPrice,sortByRating);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PostMapping
@@ -45,7 +57,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProductById(@PathVariable Long id){
-        productService.deletePRoductById(id);
+        productService.deleteProductById(id);
         return new ResponseEntity<>("Product with id " + id + " has been deleted", HttpStatus.NO_CONTENT);
     }
 
