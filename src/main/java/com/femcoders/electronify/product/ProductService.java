@@ -1,5 +1,7 @@
 package com.femcoders.electronify.product;
 
+import com.femcoders.electronify.category.Category;
+import com.femcoders.electronify.category.CategoryRepository;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
@@ -9,6 +11,7 @@ import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException
 import com.femcoders.electronify.review.Review;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,15 +19,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final EntityManager entityManager;
-
-    public ProductService(ProductRepository productRepository, EntityManager entityManager) {
-        this.productRepository = productRepository;
-        this.entityManager = entityManager;
-    }
+    private final CategoryRepository categoryRepository;
 
     public List<ProductResponse> findAllProducts(){
         List<Product> products = productRepository.findAll();
@@ -132,8 +132,8 @@ public class ProductService {
     }
 
     public ProductResponse createNewProduct(ProductRequest productRequest){
-       /* Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
-                .orElseThrow(() -> new RuntimeException("NO id category found")); */
+        Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
+                .orElseThrow(() -> new RuntimeException("NO id category found"));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent()){
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
@@ -144,8 +144,8 @@ public class ProductService {
     }
 
     public ProductResponse updateProduct (Long id, ProductRequest productRequest){
-        /* Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
-                .orElseThrow(() -> new RuntimeException("NO id category found")); */
+        Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
+                .orElseThrow(() -> new RuntimeException("NO id category found"));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent() && !isExistingProduct.get().getId().equals(id)){
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
@@ -158,7 +158,7 @@ public class ProductService {
         productById.setPrice(productRequest.price());
         productById.setImageUrl(productRequest.imageUrl());
         productById.setFeatured(productRequest.featured());
-        //productById.setCategory(isExistingCategory);
+        productById.setCategory(isExistingCategory);
 
         productRepository.save(productById);
         return ProductMapper.fromEntity(productById);
