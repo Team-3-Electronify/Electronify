@@ -14,6 +14,6 @@ public record ProductResponse(
         Category category,
         double rating,
         int reviewCount
-        //,List<Review> reviews
+        ,List<Review> reviews
 ) {
 }
