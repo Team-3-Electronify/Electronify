@@ -37,6 +37,7 @@ INSERT INTO users (id, username, email, password) VALUES
 (1, 'admin', 'admin@example.com', '$2a$10$HsMF2wIVlZAelTWGNHD/r.lbHJemKWx0.HEfqHKHF91CR8R3fDjX2'),
 (2, 'user', 'user@example.com', '$2a$10$HsMF2wIVlZAelTWGNHD/r.lbHJemKWx0.HEfqHKHF91CR8R3fDjX2');
 
+-- User roles
 INSERT INTO user_roles (user_id, roles) VALUES
 (1, 'ADMIN'), -- admin user with ADMIN role
 (2, 'USER'); -- user with USER role
