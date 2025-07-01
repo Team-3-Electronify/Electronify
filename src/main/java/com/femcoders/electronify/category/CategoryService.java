@@ -3,6 +3,7 @@ package com.femcoders.electronify.category;
 import com.femcoders.electronify.category.dto.CategoryMapper;
 import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.category.dto.CategoryResponse;
+import com.femcoders.electronify.category.dto.CategoryWithProductsResponse;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,12 @@ public class CategoryService {
         return categories.stream()
                 .map(category -> CategoryMapper.fromEntity(category))
                 .toList();
+    }
+    public CategoryWithProductsResponse findCategoryById(Long id){
+        Category categoryById = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found " + id));
+
+        return CategoryMapper.toCategoryWithProducts(categoryById);
     }
 
     public CategoryResponse createNewCategory(CategoryRequest categoryRequest){
