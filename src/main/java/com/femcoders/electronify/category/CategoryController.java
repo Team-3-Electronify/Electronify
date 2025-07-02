@@ -2,6 +2,9 @@ package com.femcoders.electronify.category;
 
 import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.category.dto.CategoryResponse;
+import com.femcoders.electronify.category.dto.CategoryWithProductsResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
+@Tag(name = "Categories", description = "Operations related to categories")
 public class CategoryController {
     private final CategoryService categoryService;
     public CategoryController(CategoryService categoryService) {
@@ -18,24 +22,35 @@ public class CategoryController {
     }
     
     @GetMapping
+    @Operation(summary = "Get all categories")
     public ResponseEntity<List<CategoryResponse>> getAllCategoryList(){
         List<CategoryResponse> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get categories by Id")
+    public ResponseEntity<CategoryWithProductsResponse> getCategoryById(@PathVariable Long id){
+        CategoryWithProductsResponse category = categoryService.findCategoryById(id);
+        return new ResponseEntity<>(category, HttpStatus.OK);
+    }
     
     @PostMapping
+    @Operation(summary = "Post new category")
     public ResponseEntity<CategoryResponse> postNewCategory(@Valid @RequestBody CategoryRequest categoryRequest){
         CategoryResponse newCategory = categoryService.createNewCategory(categoryRequest);
         return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update category by ID")
     public ResponseEntity<CategoryResponse> updateCategoryById(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest){
         CategoryResponse updatedCategory = categoryService.updateCategory(id, categoryRequest);
         return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete category by ID")
     public ResponseEntity<String> deleteCategoryById(@PathVariable Long id){
         categoryService.deleteCategoryById(id);
         return new ResponseEntity<>("Category with id " + id + " has been deleted", HttpStatus.NO_CONTENT);
