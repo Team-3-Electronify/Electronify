@@ -2,6 +2,8 @@ package com.femcoders.electronify.exceptions;
 
 import com.femcoders.electronify.cart.exeptions.CartNotFoundException;
 import com.femcoders.electronify.cart.exeptions.ItemNotFoundException;
+import com.femcoders.electronify.category.exceptions.CategoryAlreadyExistException;
+import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
 import org.springframework.http.HttpStatus;
@@ -34,5 +36,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ItemNotFoundException.class)
     public ResponseEntity<String> handleItemNotFoundException(ItemNotFoundException e){
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<String> handleCategoryNotFound(CategoryNotFoundException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CategoryAlreadyExistException.class)
+    public ResponseEntity<String> handleCategoryAlreadyExist(CategoryAlreadyExistException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 }
