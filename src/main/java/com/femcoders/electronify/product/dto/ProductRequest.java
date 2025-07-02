@@ -1,10 +1,12 @@
 package com.femcoders.electronify.product.dto;
 
+import io.swagger.v3.oas.models.media.MediaType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 public record ProductRequest(
         @NotBlank(message = "Name is required")
@@ -14,9 +16,8 @@ public record ProductRequest(
         @Positive(message = "The number entered must be positive")
         double price,
 
-        @NotBlank(message = "The url image is required")
-        @URL(message = "The URL is not valid")
-        String imageUrl,
+        @NotNull
+        MultipartFile image,
 
         boolean featured,
 

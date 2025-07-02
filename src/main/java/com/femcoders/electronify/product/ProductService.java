@@ -2,6 +2,7 @@ package com.femcoders.electronify.product;
 
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.category.CategoryRepository;
+import com.femcoders.electronify.cloudinary.CloudinaryService;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
@@ -15,8 +16,10 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -26,6 +29,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final EntityManager entityManager;
     private final CategoryRepository categoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     public List<ProductResponse> findAllProducts(){
@@ -119,7 +123,7 @@ public class ProductService {
     @Transactional
     private Predicate createPricePredicate(CriteriaBuilder cBuilder, Path<Double> pricePath, String priceGroup) {
         switch (priceGroup) {
-            case "Less than 50€":
+            case "Less than 50 €":
                 return cBuilder.lessThan(pricePath, 50.0);
             case "50€ - 150€":
                 return cBuilder.between(pricePath, 50.0, 150.0);
@@ -137,20 +141,24 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse createNewProduct(ProductRequest productRequest){
+    public ProductResponse createNewProduct(ProductRequest productRequest) throws IOException {
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found"));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent()){
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
         }
-        Product newProduct = ProductMapper.toEntity(productRequest);
+
+        Map uploadResult = cloudinaryService.uploadFile(productRequest.image());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
+        Product newProduct = ProductMapper.toEntity(productRequest, imageUrl, isExistingCategory);
         Product savedProduct = productRepository.save(newProduct);
         return ProductMapper.fromEntity(savedProduct);
     }
 
     @Transactional
-    public ProductResponse updateProduct (Long id, ProductRequest productRequest){
+    public ProductResponse updateProduct (Long id, ProductRequest productRequest) throws IOException {
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new RuntimeException("NO id category found"));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
@@ -163,9 +171,15 @@ public class ProductService {
 
         productById.setName(productRequest.name().toLowerCase());
         productById.setPrice(productRequest.price());
-        productById.setImageUrl(productRequest.imageUrl());
         productById.setFeatured(productRequest.featured());
         productById.setCategory(isExistingCategory);
+        try {
+            Map uploadResult = cloudinaryService.uploadFile(productRequest.image());
+            String imageUrl = (String) uploadResult.get("secure_url");
+            productById.setImageUrl(imageUrl);
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading image to Cloudinary", e);
+        }
 
         productRepository.save(productById);
         return ProductMapper.fromEntity(productById);
@@ -195,6 +209,22 @@ public class ProductService {
     public void deleteProductById(Long id){
         Product isExisting = productRepository.findById(id)
                 .orElseThrow(() -> new NoIdProductFoundException(id));
+        String imageUrl = isExisting.getImageUrl();
+
+        String withoutPrefix = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
+        if (withoutPrefix.matches("v\\d+/.+")) {
+            withoutPrefix = withoutPrefix.substring(withoutPrefix.indexOf('/') + 1);
+        }
+        int dotIndex = withoutPrefix.lastIndexOf('.');
+        String publicId = (dotIndex != -1) ? withoutPrefix.substring(0, dotIndex) : withoutPrefix;
+
+
+        try {
+            cloudinaryService.deleteFile(publicId);
+        } catch (IOException e) {
+            throw new RuntimeException("Error deleting image from Cloudinary: " + e.getMessage());
+        }
+
         productRepository.deleteById(id);
     }
 
