@@ -49,7 +49,7 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException(idCategory));
         Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
         if (isExistingCategory.isPresent()){
-            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());;
+            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());
         }
         isExisting.setName(categoryRequest.name());
         Category savedCategory = categoryRepository.save(isExisting);

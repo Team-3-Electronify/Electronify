@@ -3,10 +3,12 @@ package com.femcoders.electronify.review;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
 import com.femcoders.electronify.product.ProductService;
+import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.review.dto.ReviewMapper;
 import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import com.femcoders.electronify.user.UserRepository;
+import com.femcoders.electronify.user.exceptions.UserNotFoundException;
 import com.femcoders.electronify.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -27,9 +29,9 @@ public class ReviewService {
     @Transactional
     public ReviewResponse createReview(ReviewRequest request) {
         Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.productId()));
+                .orElseThrow(() -> new NoIdProductFoundException(request.productId()));
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.userId()));
+                .orElseThrow(() -> new UserNotFoundException(request.userId()));
         Review review = ReviewMapper.toEntity(request);
         review.setProduct(product);
         review.setUser(user);
@@ -41,7 +43,7 @@ public class ReviewService {
     @Transactional
     public List<ReviewResponse> getReviewsByProductId(Long productId) {
         if (reviewRepository.findByProduct_Id(productId).isEmpty()) {
-            throw new RuntimeException("Product not found with id: " + productId);
+            throw new NoIdProductFoundException(productId);
         }
         return reviewRepository.findByProduct_Id(productId).stream()
                 .map(ReviewMapper::toResponse)
@@ -51,7 +53,7 @@ public class ReviewService {
     @Transactional
     public List<ReviewResponse> getReviewsByUserId(Long userId) {
         if (reviewRepository.findByUser_Id(userId).isEmpty()) {
-            throw new RuntimeException("User not found with id: " + userId);
+            throw new UserNotFoundException(userId);
         }
         return reviewRepository.findByUser_Id(userId).stream()
                 .map(ReviewMapper::toResponse)
