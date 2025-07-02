@@ -5,9 +5,11 @@ import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,16 +45,25 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<ProductResponse> postNewProduct(@Valid @RequestBody ProductRequest productRequest){
-        ProductResponse newProduct = productService.createNewProduct(productRequest);
-        return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponse> postNewProduct(@Valid @ModelAttribute ProductRequest productRequest){
+        try {
+            ProductResponse newProduct = productService.createNewProduct(productRequest);
+            return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> updateProductById(@PathVariable Long id,@Valid @RequestBody ProductRequest productRequest){
-        ProductResponse updatedProduct = productService.updateProduct(id,productRequest);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponse> updateProductById(@PathVariable Long id,@Valid @ModelAttribute ProductRequest productRequest){
+        try {
+            ProductResponse updatedProduct = productService.updateProduct(id, productRequest);
+            return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
