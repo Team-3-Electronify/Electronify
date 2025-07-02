@@ -3,6 +3,8 @@ package com.femcoders.electronify.user.controller;
 import com.femcoders.electronify.user.UserService;
 import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +23,19 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Operations related to authentication users")
 public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
+    @Operation(summary = "Post a new user register")
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest request) {
         UserResponse registeredUser = userService.registerUser(request);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Post a new user login")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         try {
