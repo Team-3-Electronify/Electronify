@@ -4,8 +4,9 @@ import com.femcoders.electronify.category.dto.CategoryMapper;
 import com.femcoders.electronify.category.dto.CategoryRequest;
 import com.femcoders.electronify.category.dto.CategoryResponse;
 import com.femcoders.electronify.category.dto.CategoryWithProductsResponse;
+import com.femcoders.electronify.category.exceptions.CategoryAlreadyExistException;
+import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.exceptions.EmptyListException;
-import com.femcoders.electronify.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,17 +27,17 @@ public class CategoryService {
                 .map(category -> CategoryMapper.fromEntity(category))
                 .toList();
     }
+
     public CategoryWithProductsResponse findCategoryById(Long id){
         Category categoryById = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found " + id));
-
+                .orElseThrow(() -> new CategoryNotFoundException(id));
         return CategoryMapper.toCategoryWithProducts(categoryById);
     }
 
     public CategoryResponse createNewCategory(CategoryRequest categoryRequest){
         Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
         if (isExistingCategory.isPresent()){
-            throw new RuntimeException("Category exist");
+            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());
         }
         Category newCategory = CategoryMapper.toEntity(categoryRequest);
         Category savedCategory = categoryRepository.save(newCategory);
@@ -45,10 +46,10 @@ public class CategoryService {
 
     public CategoryResponse updateCategory(Long idCategory, CategoryRequest categoryRequest){
         Category isExisting = categoryRepository.findById(idCategory)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + idCategory));
+                .orElseThrow(() -> new CategoryNotFoundException(idCategory));
         Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
         if (isExistingCategory.isPresent()){
-            throw new RuntimeException("Category exist");
+            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());
         }
         isExisting.setName(categoryRequest.name());
         Category savedCategory = categoryRepository.save(isExisting);
@@ -57,7 +58,7 @@ public class CategoryService {
 
     public void deleteCategoryById(Long id){
         Category isExisting = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException(id));
         categoryRepository.deleteById(id);
     }
 }
