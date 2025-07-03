@@ -5,6 +5,8 @@ import com.femcoders.electronify.cart.dto.CartResponse;
 import com.femcoders.electronify.cart.exeptions.CartNotFoundException;
 import com.femcoders.electronify.cart.models.Cart;
 import com.femcoders.electronify.cart.repositories.CartRepository;
+import com.femcoders.electronify.category.Category;
+import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
 import com.femcoders.electronify.user.UserRepository;
 import com.femcoders.electronify.user.model.User;
@@ -77,4 +79,24 @@ class CartServiceTest {
 
         assertThrows(CartNotFoundException.class, () -> cartService.getCartByUser());
     }
+
+    @Test
+    void addToCart_shouldAddNewItemToCart() {
+        User user = new User(); user.setId(1L);
+        Product product = Product.builder().id(100L).name("Test Product").price(10.0).featured(false).imageUrl("img.jpg").category(new Category()).build();
+
+        Cart cart = new Cart(user);
+        cart.setItems(new ArrayList<>());
+
+        Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
+        Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        Mockito.when(productRepository.findById(100L)).thenReturn(Optional.of(product));
+
+        CartResponse response = cartService.addToCart(100L, 2);
+
+        assertEquals(1, response.items().size());
+        assertEquals(20.0, response.totalPrice(), 0.01);
+        Mockito.verify(cartRepository).save(Mockito.any(Cart.class));
+    }
+
 }
