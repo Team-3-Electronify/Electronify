@@ -156,4 +156,28 @@ class CartServiceTest {
 
         assertThrows(ItemNotFoundException.class, () -> cartService.updateCartItemQuantity(300L, 2));
     }
+
+    @Test
+    void removeFromCart() {
+        User user = new User(); user.setId(1L);
+        Product product = Product.builder()
+                .id(400L)
+                .name("Product")
+                .price(10.0)
+                .imageUrl("img.jpg")
+                .featured(false)
+                .category(new Category())
+                .build();
+        Cart cart = new Cart(user);
+        CartItem item = new CartItem(cart, product, 2);
+        cart.setItems(new ArrayList<>(List.of(item)));
+
+        Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
+        Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+
+        cartService.removeFromCart(400L);
+
+        assertTrue(cart.getItems().isEmpty());
+        Mockito.verify(cartRepository).save(cart);
+    }
 }
