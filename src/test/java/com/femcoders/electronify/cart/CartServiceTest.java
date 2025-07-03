@@ -66,4 +66,15 @@ class CartServiceTest {
         assertEquals(1L, response.userId());
         Mockito.verify(cartRepository).findByUser(user);
     }
+
+    @Test
+    void getCartByUser_WhenCartNotFound() {
+        User user = new User();
+        user.setUsername("noCartUser");
+
+        Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
+        Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
+
+        assertThrows(CartNotFoundException.class, () -> cartService.getCartByUser());
+    }
 }
