@@ -101,7 +101,7 @@ public class CartService {
         return total;
     }
 
-    private User getAuthenticatedUser() {
+    public User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
