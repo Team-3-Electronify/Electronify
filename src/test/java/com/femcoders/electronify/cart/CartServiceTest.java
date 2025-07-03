@@ -8,6 +8,7 @@ import com.femcoders.electronify.cart.repositories.CartRepository;
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
+import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.user.UserRepository;
 import com.femcoders.electronify.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,5 +98,14 @@ class CartServiceTest {
         Mockito.verify(cartRepository).save(Mockito.any(Cart.class));
     }
 
-    
+    @Test
+    void addToCart_WhenProductNotFound() {
+        User user = new User();
+
+        Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
+        Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.of(new Cart(user)));
+        Mockito.when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(NoIdProductFoundException.class, () -> cartService.addToCart(999L, 1));
+    }
 }
