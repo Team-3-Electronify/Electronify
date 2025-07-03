@@ -1,12 +1,11 @@
 package com.femcoders.electronify.review.dto;
 
-import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.review.Review;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ReviewMapper {
-    public static  Review toEntity(ReviewRequest reviewRequest) {
+    public static Review toEntity(ReviewRequest reviewRequest) {
         return Review.builder()
                 .rating(reviewRequest.rating())
                 .body(reviewRequest.body())
@@ -14,7 +13,6 @@ public class ReviewMapper {
     }
 
     public static ReviewResponse toResponse(Review review) {
-        return new ReviewResponse(review.getId(), review.getRating(), review.getBody(), review.getProduct().getId());
+        return new ReviewResponse(review.getId(), review.getRating(), review.getBody(), review.getProduct().getId(), review.getUser().getUsername());
     }
 }
-
