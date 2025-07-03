@@ -8,6 +8,7 @@ import com.femcoders.electronify.cart.repositories.CartRepository;
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
+import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.user.UserRepository;
 import com.femcoders.electronify.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,20 +84,33 @@ class CartServiceTest {
     @Test
     void addToCart_shouldAddNewItemToCart() {
         User user = new User(); user.setId(1L);
-        Product product = Product.builder().id(100L).name("Test Product").price(10.0).featured(false).imageUrl("img.jpg").category(new Category()).build();
-
+        Product product = Product.builder()
+                .id(100L)
+                .name("Test Product")
+                .price(10.0).featured(false)
+                .imageUrl("img.jpg")
+                .category(new Category())
+                .build();
         Cart cart = new Cart(user);
         cart.setItems(new ArrayList<>());
-
         Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
         Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
         Mockito.when(productRepository.findById(100L)).thenReturn(Optional.of(product));
-
         CartResponse response = cartService.addToCart(100L, 2);
-
         assertEquals(1, response.items().size());
         assertEquals(20.0, response.totalPrice(), 0.01);
         Mockito.verify(cartRepository).save(Mockito.any(Cart.class));
+    }
+
+    @Test
+    void addToCart_WhenProductNotFound() {
+        User user = new User();
+
+        Mockito.doReturn(user).when(cartService).getAuthenticatedUser();
+        Mockito.when(cartRepository.findByUser(user)).thenReturn(Optional.of(new Cart(user)));
+        Mockito.when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(NoIdProductFoundException.class, () -> cartService.addToCart(999L, 1));
     }
 
 }
