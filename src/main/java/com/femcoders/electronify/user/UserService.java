@@ -1,8 +1,11 @@
 package com.femcoders.electronify.user;
 
+import com.femcoders.electronify.review.Review;
+import com.femcoders.electronify.review.ReviewRepository;
 import com.femcoders.electronify.user.dto.UserMapper;
 import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
+import com.femcoders.electronify.user.dto.UserWithReviewsResponse;
 import com.femcoders.electronify.user.exceptions.UserNotFoundException;
 import com.femcoders.electronify.user.model.Role;
 import com.femcoders.electronify.user.model.User;
@@ -23,6 +26,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ReviewRepository reviewRepository;
 
     public UserResponse registerUser(UserRequest request) {
         User user = userMapper.toEntity(request);
@@ -38,9 +42,18 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    public UserResponse getUserById(Long id) {
+    public UserWithReviewsResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
+
+        List<Review> reviews = reviewRepository.findByUser_Id(id);
+
+        return userMapper.toUserWithReviewsResponse(user, reviews);
+    }
+
+    public UserResponse getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         return userMapper.toDto(user);
     }
 
