@@ -13,6 +13,7 @@ import com.femcoders.electronify.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +31,7 @@ public class ReviewService {
     public ReviewResponse createReview(ReviewRequest request) {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new NoIdProductFoundException(request.productId()));
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new UserNotFoundException(request.userId()));
+        User user = getAuthenticatedUser();
         Review review = ReviewMapper.toEntity(request);
         review.setProduct(product);
         review.setUser(user);
@@ -60,4 +60,8 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    private User getAuthenticatedUser() {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(userName).orElseThrow(()->new RuntimeException("User not found: " + userName));
+    }
 }
