@@ -2,6 +2,7 @@ package com.femcoders.electronify.product;
 
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.category.CategoryRepository;
+import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.cloudinary.CloudinaryService;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
@@ -143,7 +144,7 @@ public class ProductService {
     @Transactional
     public ProductResponse createNewProduct(ProductRequest productRequest) throws IOException {
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
-                .orElseThrow(() -> new RuntimeException("NO id category found"));
+                .orElseThrow(() -> new CategoryNotFoundException(productRequest.categoryId()));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent()){
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
