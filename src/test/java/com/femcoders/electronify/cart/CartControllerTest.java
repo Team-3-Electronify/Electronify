@@ -32,12 +32,14 @@ class CartControllerTest {
     private ObjectMapper objectMapper;
 
     private CartResponse cartResponse;
-
     private final Long productId = 1L;
+    CartItemDto item;
+    CartRequest request;
 
     @BeforeEach
     void setUp() {
-        CartItemDto item = new CartItemDto(productId, "Test Product", 10.0, 2);
+        request = new CartRequest(2);
+        item = new CartItemDto(productId, "Test Product", 10.0, 2);
         cartResponse = new CartResponse(1L, 1L, List.of(item), 20.0);
     }
 
@@ -53,12 +55,26 @@ class CartControllerTest {
 
     @Test
     void addToCartTest() throws Exception {
-        CartRequest request = new CartRequest(2);
         Mockito.when(cartService.addToCart(productId, 2)).thenReturn(cartResponse);
+
         mockMvc.perform(post("/api/cart/add/{productId}", productId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.items[0].quantity").value(2));
+    }
+
+    @Test
+    void updateCartItem() throws Exception {
+        CartResponse updated = new CartResponse(1L, 1L, List.of(item), 10.0);
+
+        Mockito.when(cartService.updateCartItemQuantity(productId, 2)).thenReturn(updated);
+
+        mockMvc.perform(put("/api/cart/update/{productId}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].quantity").value(2))
+                .andExpect(jsonPath("$.totalPrice").value(10.0));
     }
 }
