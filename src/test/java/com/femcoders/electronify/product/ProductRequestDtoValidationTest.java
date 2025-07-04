@@ -135,7 +135,7 @@ class ProductRequestDtoValidationTest {
     }
 
     @Test
-    void should_validationCategoryIdNulFailed_then_throwError(){
+    void should_validationCategoryIdNullFailed_then_throwError(){
         MockMultipartFile mockImg = new MockMultipartFile(
                 "image",
                 "iphone15.jpg",
