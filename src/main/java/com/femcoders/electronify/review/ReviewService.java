@@ -60,7 +60,7 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    private User getAuthenticatedUser() {
+    public User getAuthenticatedUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(userName).orElseThrow(()->new RuntimeException("User not found: " + userName));
     }
