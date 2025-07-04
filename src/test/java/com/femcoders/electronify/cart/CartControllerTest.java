@@ -77,4 +77,12 @@ class CartControllerTest {
                 .andExpect(jsonPath("$.items[0].quantity").value(2))
                 .andExpect(jsonPath("$.totalPrice").value(10.0));
     }
+
+    @Test
+    void removeFromCartTest() throws  Exception {
+        mockMvc.perform(delete("/api/cart/remove/{productId}", productId))
+                .andExpect(status().isOk());
+
+        Mockito.verify(cartService).removeFromCart(productId);
+    }
 }
