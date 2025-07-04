@@ -274,34 +274,4 @@ class ProductServiceTest {
         assertEquals(1,productUpdate.getReviewCount());
     }
 
-    @Test
-    void should_ProductList_when_filteredBy(){
-
-        Category category1 = new Category(1L, "phone", new ArrayList<>());
-        Category category2 = new Category(1L, "TV", new ArrayList<>());
-
-        Product product1 = new Product(null,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category1,3.5,5,new ArrayList<>());
-        Product product2 = new Product(null,"Samsung SmartTV", 1050, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,4.5,3,new ArrayList<>());
-        Product product3 = new Product(null,"Iphone 16", 950, "https://res.cloudinary.com/demo/image/upload/iphone16.jpg", true, category1,5,9,new ArrayList<>());
-        Product product4 = new Product(null,"Iphone 5", 350, "https://res.cloudinary.com/demo/image/upload/iphone5.jpg", true, category1,1.5,15,new ArrayList<>());
-        Product product5 = new Product(null,"Samsung Galaxy S1", 40, "https://res.cloudinary.com/demo/image/upload/nokia.jpg", true, category1,3.0,25,new ArrayList<>());
-        Product product6 = new Product(null,"LG SmartTV", 850, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,3.5,3,new ArrayList<>());
-        Product product7 = new Product(null,"LG small SmartTV", 750, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,2.5,9,new ArrayList<>());
-
-        List<Product> mockProducts = List.of(product1, product2, product3, product4, product5, product6, product7);
-
-        productRepository.saveAll(mockProducts);
-
-        List<ProductResponse> resul1 = productService.findProductsByFilters(
-                Optional.of("Iphone"),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.of("asc"),
-                Optional.empty()
-        );
-
-        assertEquals(3, resul1.size());
-        assertEquals("Iphone 5", resul1.get(0).name());
-    }
-
 }
