@@ -2,6 +2,7 @@ package com.femcoders.electronify.cart;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.femcoders.electronify.cart.dto.CartItemDto;
+import com.femcoders.electronify.cart.dto.CartRequest;
 import com.femcoders.electronify.cart.dto.CartResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,12 +10,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CartController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -39,12 +42,23 @@ class CartControllerTest {
     }
 
     @Test
-    void getCartTest() throws Exception{
+    void getCartTest() throws Exception {
         Mockito.when(cartService.getCartByUser()).thenReturn(cartResponse);
 
         mockMvc.perform(get("/api/cart"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1L))
                 .andExpect(jsonPath("$.items[0].productId").value(productId));
+    }
+
+    @Test
+    void addToCartTest() throws Exception {
+        CartRequest request = new CartRequest(2);
+        Mockito.when(cartService.addToCart(productId, 2)).thenReturn(cartResponse);
+        mockMvc.perform(post("/api/cart/add/{productId}", productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.items[0].quantity").value(2));
     }
 }
