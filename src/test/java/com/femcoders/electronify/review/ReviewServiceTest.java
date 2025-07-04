@@ -120,4 +120,15 @@ class ReviewServiceTest {
         assertThrows(NoIdProductFoundException.class,
                 () -> reviewService.getReviewsByProductId(100L));
     }
+
+    @Test
+    void getReviewByUserIdTest_Success() {
+        Mockito.when(reviewRepository.findByUser_Id(10L))
+                .thenReturn(List.of(testReview));
+
+        List<ReviewResponse> responses = reviewService.getReviewsByUserId(10L);
+
+        assertEquals(1, responses.size());
+        assertEquals("Great product!", responses.get(0).body());
+    }
 }
