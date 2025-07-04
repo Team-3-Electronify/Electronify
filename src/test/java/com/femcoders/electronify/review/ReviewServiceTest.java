@@ -3,6 +3,7 @@ package com.femcoders.electronify.review;
 import com.femcoders.electronify.product.Product;
 import com.femcoders.electronify.product.ProductRepository;
 import com.femcoders.electronify.product.ProductService;
+import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import com.femcoders.electronify.user.UserRepository;
@@ -83,7 +84,15 @@ class ReviewServiceTest {
         assertEquals(4.5, response.rating());
         assertEquals(1L, response.id());
         assertEquals("Greate product!", response.body());
-        
+
         Mockito.verify(productService).updateProductStats(100L);
+    }
+
+    @Test
+    void createReview_WhenProductNotFound() {
+        Mockito.when(productRepository.findById(100L)).thenReturn(Optional.empty());
+
+        assertThrows(NoIdProductFoundException.class,
+                () -> reviewService.createReview(reviewRequest));
     }
 }
