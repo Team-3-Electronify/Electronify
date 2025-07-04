@@ -23,11 +23,6 @@ public class ProductServiceTestFilters {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     @Test
     void should_ReturnFilteredProducts_When_FilterByNameAndSortPriceAsc() {
