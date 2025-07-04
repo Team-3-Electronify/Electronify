@@ -7,6 +7,7 @@ import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import com.femcoders.electronify.user.UserRepository;
+import com.femcoders.electronify.user.exceptions.UserNotFoundException;
 import com.femcoders.electronify.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -130,5 +131,14 @@ class ReviewServiceTest {
 
         assertEquals(1, responses.size());
         assertEquals("Great product!", responses.get(0).body());
+    }
+
+    @Test
+    void getReviewByUserIdTest_Empty() {
+        Mockito.when(reviewRepository.findByUser_Id(10L))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(UserNotFoundException.class,
+                () -> reviewService.getReviewsByUserId(10L));
     }
 }
