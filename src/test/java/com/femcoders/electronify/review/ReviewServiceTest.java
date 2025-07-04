@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,12 +102,22 @@ class ReviewServiceTest {
     @Test
     void getReviewsByProductIdTest_Success() {
         Mockito.when(reviewRepository
-                .findByProduct_Id(100L))
+                        .findByProduct_Id(100L))
                 .thenReturn(List.of(testReview));
 
         List<ReviewResponse> responses = reviewService.getReviewsByProductId(100L);
 
         assertEquals(1, responses.size());
         assertEquals("Great product!", responses.get(0).body());
+    }
+
+    @Test
+    void getReviewByProductIdTest_Empty() {
+        Mockito.when(reviewRepository
+                        .findByProduct_Id(100L))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(NoIdProductFoundException.class,
+                () -> reviewService.getReviewsByProductId(100L));
     }
 }
