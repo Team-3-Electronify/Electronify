@@ -2,7 +2,6 @@ package com.femcoders.electronify.product;
 
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.category.CategoryRepository;
-import com.femcoders.electronify.category.dto.CategoryMapper;
 import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.cloudinary.CloudinaryService;
 import com.femcoders.electronify.exceptions.EmptyListException;
@@ -11,6 +10,8 @@ import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
+import com.femcoders.electronify.review.Review;
+import com.femcoders.electronify.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -24,8 +25,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -251,6 +251,57 @@ class ProductServiceTest {
         verify(productRepository).deleteById(1L);
 
 
+    }
+
+    @Test
+    void should_updateProductStats_when_userPostNewReview(){
+        Category category = new Category(1L, "phone", new ArrayList<>());
+
+        Product existingProduct = new Product(1L,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
+
+        User user = new User(); user.setId(1L); user.setUsername("username");
+
+        Review review = new Review(1L,5,"Good!!", existingProduct, user);
+
+        existingProduct.getReviews().add(review);
+
+        Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
+        Mockito.when(productRepository.save(Mockito.any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+        Product productUpdate = productService.updateProductStats(1L);
+
+        assertEquals(5.0,productUpdate.getRating());
+        assertEquals(1,productUpdate.getReviewCount());
+    }
+
+    @Test
+    void should_ProductList_when_filteredBy(){
+
+        Category category1 = new Category(1L, "phone", new ArrayList<>());
+        Category category2 = new Category(1L, "TV", new ArrayList<>());
+
+        Product product1 = new Product(null,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category1,3.5,5,new ArrayList<>());
+        Product product2 = new Product(null,"Samsung SmartTV", 1050, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,4.5,3,new ArrayList<>());
+        Product product3 = new Product(null,"Iphone 16", 950, "https://res.cloudinary.com/demo/image/upload/iphone16.jpg", true, category1,5,9,new ArrayList<>());
+        Product product4 = new Product(null,"Iphone 5", 350, "https://res.cloudinary.com/demo/image/upload/iphone5.jpg", true, category1,1.5,15,new ArrayList<>());
+        Product product5 = new Product(null,"Samsung Galaxy S1", 40, "https://res.cloudinary.com/demo/image/upload/nokia.jpg", true, category1,3.0,25,new ArrayList<>());
+        Product product6 = new Product(null,"LG SmartTV", 850, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,3.5,3,new ArrayList<>());
+        Product product7 = new Product(null,"LG small SmartTV", 750, "https://res.cloudinary.com/demo/image/upload/samsungTV.jpg", true, category2,2.5,9,new ArrayList<>());
+
+        List<Product> mockProducts = List.of(product1, product2, product3, product4, product5, product6, product7);
+
+        productRepository.saveAll(mockProducts);
+
+        List<ProductResponse> resul1 = productService.findProductsByFilters(
+                Optional.of("Iphone"),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of("asc"),
+                Optional.empty()
+        );
+
+        assertEquals(3, resul1.size());
+        assertEquals("Iphone 5", resul1.get(0).name());
     }
 
 }

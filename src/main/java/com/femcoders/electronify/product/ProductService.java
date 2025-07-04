@@ -124,7 +124,7 @@ public class ProductService {
     @Transactional
     private Predicate createPricePredicate(CriteriaBuilder cBuilder, Path<Double> pricePath, String priceGroup) {
         switch (priceGroup) {
-            case "Less than 50 €":
+            case "Less than 50€":
                 return cBuilder.lessThan(pricePath, 50.0);
             case "50€ - 150€":
                 return cBuilder.between(pricePath, 50.0, 150.0);
