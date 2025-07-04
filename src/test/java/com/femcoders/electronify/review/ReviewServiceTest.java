@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,12 +65,12 @@ class ReviewServiceTest {
         testReview = Review.builder()
                 .id(1L)
                 .rating(4.5)
-                .body("Greate product!")
+                .body("Great product!")
                 .product(testProduct)
                 .user(testUser)
                 .build();
 
-        reviewRequest = new ReviewRequest(4.5, "Greate product!", 100L);
+        reviewRequest = new ReviewRequest(4.5, "Great product!", 100L);
     }
 
     @Test
@@ -83,16 +84,29 @@ class ReviewServiceTest {
         assertNotNull(response);
         assertEquals(4.5, response.rating());
         assertEquals(1L, response.id());
-        assertEquals("Greate product!", response.body());
+        assertEquals("Great product!", response.body());
 
         Mockito.verify(productService).updateProductStats(100L);
     }
 
     @Test
     void createReview_WhenProductNotFound() {
-        Mockito.when(productRepository.findById(100L)).thenReturn(Optional.empty());
+        Mockito.when(productRepository.findById(100L))
+                .thenReturn(Optional.empty());
 
         assertThrows(NoIdProductFoundException.class,
                 () -> reviewService.createReview(reviewRequest));
+    }
+
+    @Test
+    void getReviewsByProductIdTest_Success() {
+        Mockito.when(reviewRepository
+                .findByProduct_Id(100L))
+                .thenReturn(List.of(testReview));
+
+        List<ReviewResponse> responses = reviewService.getReviewsByProductId(100L);
+
+        assertEquals(1, responses.size());
+        assertEquals("Great product!", responses.get(0).body());
     }
 }
