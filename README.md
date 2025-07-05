@@ -5,6 +5,41 @@ The project includes the creation of a RESTful API that manages products, catego
 Product images are handled via Cloudinary, allowing efficient and secure image storage and delivery. The backend is fully testable using tools like Postman or any other API testing platform.
 This backend is designed to seamlessly integrate with an existing frontend application, delivering a complete and modern e-commerce experience.
 
+## Project Structure
+
+```text
+src
+└── com.temcoders.electronify
+    ├── cart                   # Shopping cart logic (structure not expanded)
+    ├── category               # Category 
+    │   ├── dto                # DTOs for category operations
+    │   ├── exceptions         # Custom exceptions for category
+    │   ├── Category           # JPA Entity
+    │   ├── CategoryController # REST controller
+    │   ├── CategoryRepository # Spring Data JPA repository
+    │   └── CategoryService    # Business logic
+    ├── cloudinary             # Cloudinary configuration and integration
+    │   ├── CloudinaryConfig   # Cloudinary configuration setup
+    │   └── CloudinaryService  # Service for media uploads
+    ├── config                 # Security and web configuration
+    │   ├── SecurityConfig     # Spring Security configuration
+    │   └── WebConfig          # General web configurations
+    ├── exceptions             # Global exceptions and handlers
+    │   ├── AppException       # Base application exception
+    │   ├── EmptyListException # Custom exception for empty lists
+    │   └── GlobalExceptionHandler # Centralized exception handling
+    ├── product                # Product (structure not expanded)
+    ├── review                 # Review (structure not expanded)
+    ├── user                   # User 
+    │   ├── controller         # REST controllers for user operations
+    │   ├── dto                # DTOs for user operations
+    │   ├── exceptions         # Custom exceptions for user logic
+    │   ├── model              # User entity and related models
+    │   ├── UserRepository     # User JPA repository
+    │   └── UserService        # User service layer
+    └── ElectronifyApplication # Spring Boot application entry point
+```
+
 ## Technologies Used
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
