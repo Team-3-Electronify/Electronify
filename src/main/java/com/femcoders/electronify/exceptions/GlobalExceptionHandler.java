@@ -6,6 +6,7 @@ import com.femcoders.electronify.category.exceptions.CategoryAlreadyExistExcepti
 import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
+import com.femcoders.electronify.user.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -46,5 +47,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CategoryAlreadyExistException.class)
     public ResponseEntity<String> handleCategoryAlreadyExist(CategoryAlreadyExistException e){
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String>handleUserNotFoundException(UserNotFoundException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
