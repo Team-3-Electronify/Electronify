@@ -82,11 +82,27 @@ class ReviewControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.rating").value(4.5))
                 .andExpect(jsonPath("$.body").value("Great Product!"));
+    }
+
+    @Test
+    void postNewReviewTest_Error() throws Exception {
+        String invalidJson = """
+                {
+                    "rating": -1,
+                    "body": "",
+                    "productId": null
+                }
+                """;
+
+        mockMvc.perform(post("/api/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+                .andExpect(status().isBadRequest());
     }
 }
