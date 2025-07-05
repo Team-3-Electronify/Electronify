@@ -7,29 +7,29 @@ INSERT INTO categories (id, name) VALUES
 
 INSERT INTO products (id, name, price, image_url, featured, category_id, rating, review_count) VALUES
 -- Smartphones & Accessories
-(1, 'iPhone 15 Pro', 999.99, 'https://example.com/images/iphone15.jpg', true, 1, 4.8, 250),
-(2, 'Samsung Galaxy S24 Ultra', 1299.99, 'https://example.com/images/s24ultra.jpg', true, 1, 4.7, 180),
-(3, 'Anker Wireless Charger', 49.99, 'https://example.com/images/ankercharger.jpg', false, 1, 4.5, 500),
+(1, 'iPhone 15 Pro', 999.99, 'https://res.cloudinary.com/electronify/image/upload/v1751653258/iphone15_vlrrsy.webp', true, 1, 4.8, 250),
+(2, 'Samsung Galaxy S24 Ultra', 1299.99, 'https://res.cloudinary.com/electronify/image/upload/v1751653619/SamsungGalaxyS24Ultra_hshfhg.avif', true, 1, 4.7, 180),
+(3, 'Anker Wireless Charger', 49.99, 'https://res.cloudinary.com/electronify/image/upload/v1751654652/AnkerWirelessCharger_pulkpa.jpg', false, 1, 4.5, 500),
 
 -- Computers & Laptops
-(4, 'MacBook Air M3', 1099.00, 'https://example.com/images/macbookair.jpg', true, 2, 4.9, 150),
-(5, 'Dell XPS 15 Laptop', 1599.00, 'https://example.com/images/dellxps15.jpg', true, 2, 4.6, 120),
-(6, 'Logitech MX Master 3S Mouse', 99.99, 'https://example.com/images/logitechmouse.jpg', false, 2, 4.8, 800),
+(4, 'MacBook Air M3', 1099.00, 'https://res.cloudinary.com/electronify/image/upload/c_crop,ar_1:1/v1751653715/MacBookAirM3_rvurwv.webp', true, 2, 4.9, 150),
+(5, 'Dell XPS 15 Laptop', 1599.00, 'https://res.cloudinary.com/electronify/image/upload/v1751654557/DellXPS15Laptop_qqn5om.jpg', true, 2, 4.6, 120),
+(6, 'Logitech MX Master 3S Mouse', 99.99, 'https://res.cloudinary.com/electronify/image/upload/v1751653804/LogitechMXMaster3SMouse_c4v17a.png', false, 2, 4.8, 800),
 
 -- Cameras & Drones
-(7, 'Sony Alpha a7 IV Camera', 2499.99, 'https://example.com/images/sonya7iv.jpg', true, 3, 4.9, 90),
-(8, 'DJI Mini 4 Pro Drone', 759.00, 'https://example.com/images/djimini4.jpg', true, 3, 4.7, 130),
-(9, 'GoPro HERO12 Black', 399.99, 'https://example.com/images/gopro12.jpg', false, 3, 4.6, 210),
+(7, 'Sony Alpha a7 IV Camera', 2499.99, 'https://res.cloudinary.com/electronify/image/upload/v1751655181/SonyAlphaa7IVCamera_sdokbm.jpg', true, 3, 4.9, 90),
+(8, 'DJI Mini 4 Pro Drone', 759.00, 'https://res.cloudinary.com/electronify/image/upload/v1751655503/DJIMini4ProDrone_qzkkzs.jpg', true, 3, 4.7, 130),
+(9, 'GoPro HERO12 Black', 399.99, 'https://res.cloudinary.com/electronify/image/upload/v1751655417/GoProHERO12Black_voyajf.png', false, 3, 4.6, 210),
 
 -- Audio & Video
-(10, 'Sony WH-1000XM5 Headphones', 399.99, 'https://example.com/images/sonyxm5.jpg', true, 4, 4.8, 1100),
-(11, 'Samsung 65" QLED 4K TV', 1499.99, 'https://example.com/images/samsungtv.jpg', true, 4, 4.7, 350),
-(12, 'Bose SoundLink Revolve+ Speaker', 329.00, 'https://example.com/images/bosespeaker.jpg', false, 4, 4.6, 600),
+(10, 'Sony WH-1000XM5 Headphones', 399.99, 'https://res.cloudinary.com/electronify/image/upload/v1751655917/SonyWH-1000XM5Headphones_jfcznk.avif', true, 4, 4.8, 1100),
+(11, 'Samsung 65" QLED 4K TV', 1499.99, 'https://res.cloudinary.com/electronify/image/upload/v1751656240/Samsung65QLED_4KTV_z73a39.webp', true, 4, 4.7, 350),
+(12, 'Bose SoundLink Revolve+ Speaker', 329.00, 'https://res.cloudinary.com/electronify/image/upload/v1751655824/BoseSoundLink_RevolveSpeaker_ole70z.jpg', false, 4, 4.6, 600),
 
 -- Wearable Technology
-(13, 'Apple Watch Series 9', 399.00, 'https://example.com/images/applewatch9.jpg', true, 5, 4.8, 950),
-(14, 'Garmin Forerunner 265', 449.99, 'https://example.com/images/garmin265.jpg', true, 5, 4.7, 280),
-(15, 'Oura Ring Gen3', 299.00, 'https://example.com/images/ouraring.jpg', false, 5, 4.5, 450);
+(13, 'Apple Watch Series 9', 399.00, 'https://res.cloudinary.com/electronify/image/upload/v1751655969/AppleWatchSeries9_v9ub8p.avif', true, 5, 4.8, 950),
+(14, 'Garmin Forerunner 265', 449.99, 'https://res.cloudinary.com/electronify/image/upload/v1751656160/GarminForerunner265_goq24g.jpg', true, 5, 4.7, 280),
+(15, 'Oura Ring Gen3', 299.00, 'https://res.cloudinary.com/electronify/image/upload/v1751656292/OuraRingGen3_ego3mw.webp', false, 5, 4.5, 450);
 
 -- Users
 -- Password for all users is 'password123'
