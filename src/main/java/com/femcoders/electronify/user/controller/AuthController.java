@@ -5,6 +5,7 @@ import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class AuthController {
 
     @Operation(summary = "Post a new user register")
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest request) {
         UserResponse registeredUser = userService.registerUser(request);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
@@ -39,7 +40,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         try {
-
+            if (loginRequest.username()== null || loginRequest.username.trim().isEmpty() || loginRequest.password()== null || loginRequest.password.trim().isEmpty()){
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Invalid username or password");
+                errorResponse.put("authenticated", "false");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            }
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.username(),
