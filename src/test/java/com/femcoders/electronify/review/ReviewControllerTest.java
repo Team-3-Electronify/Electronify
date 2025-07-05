@@ -1,8 +1,8 @@
 package com.femcoders.electronify.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.femcoders.electronify.cart.CartController;
 import com.femcoders.electronify.review.dto.ReviewResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +32,37 @@ class ReviewControllerTest {
     @MockitoBean
     private ReviewService reviewService;
 
-    @Test
-    void getReviewByUserIdTest() throws Exception {
-        ReviewResponse response = new ReviewResponse(1L,
+    private ReviewResponse response;
+
+    @BeforeEach
+    public void setUp() {
+        response = new ReviewResponse(1L,
                 4.5,
                 "Great Product!",
                 100L,
                 "testUser");
+    }
 
+    @Test
+    void getReviewByUserIdTest() throws Exception {
         Mockito.when(reviewService.getReviewsByUserId(10L))
                 .thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/reviews/byUser")
                 .param("userId", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].rating").value(4.5))
+                .andExpect(jsonPath("$[0].body").value("Great Product!"));
+    }
+
+    @Test
+    void getReviewByProductIdTest() throws Exception{
+        Mockito.when(reviewService.getReviewsByProductId(100L))
+                .thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/reviews/byProduct")
+                        .param("productId", "100"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].rating").value(4.5))
