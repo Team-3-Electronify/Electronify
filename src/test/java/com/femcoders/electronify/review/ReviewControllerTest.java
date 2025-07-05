@@ -1,6 +1,7 @@
 package com.femcoders.electronify.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,12 +9,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -49,7 +52,7 @@ class ReviewControllerTest {
                 .thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/reviews/byUser")
-                .param("userId", "10"))
+                        .param("userId", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].rating").value(4.5))
@@ -57,7 +60,7 @@ class ReviewControllerTest {
     }
 
     @Test
-    void getReviewByProductIdTest() throws Exception{
+    void getReviewByProductIdTest() throws Exception {
         Mockito.when(reviewService.getReviewsByProductId(100L))
                 .thenReturn(List.of(response));
 
@@ -67,5 +70,23 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].rating").value(4.5))
                 .andExpect(jsonPath("$[0].body").value("Great Product!"));
+    }
+
+    @Test
+    void postNewReviewTest_Success() throws Exception {
+        ReviewRequest request = new ReviewRequest(4.5,
+                "Great Product!",
+                100L);
+
+        Mockito.when(reviewService.createReview(any(ReviewRequest.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/api/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.rating").value(4.5))
+                .andExpect(jsonPath("$.body").value("Great Product!"));
     }
 }
