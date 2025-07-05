@@ -1,0 +1,53 @@
+package com.femcoders.electronify.review;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.femcoders.electronify.cart.CartController;
+import com.femcoders.electronify.review.dto.ReviewResponse;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@WebMvcTest(ReviewController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class ReviewControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private ReviewService reviewService;
+
+    @Test
+    void getReviewByUserIdTest() throws Exception {
+        ReviewResponse response = new ReviewResponse(1L,
+                4.5,
+                "Great Product!",
+                100L,
+                "testUser");
+
+        Mockito.when(reviewService.getReviewsByUserId(10L))
+                .thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/reviews/byUser")
+                .param("userId", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].rating").value(4.5))
+                .andExpect(jsonPath("$[0].body").value("Great Product!"));
+    }
+}
