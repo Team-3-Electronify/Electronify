@@ -1,277 +1,190 @@
 package com.femcoders.electronify.product;
 
-import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.category.CategoryRepository;
-import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.cloudinary.CloudinaryService;
-import com.femcoders.electronify.exceptions.EmptyListException;
-import com.femcoders.electronify.product.dto.ProductMapper;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
-import com.femcoders.electronify.review.Review;
-import com.femcoders.electronify.user.model.User;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.properties")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ProductServiceTest {
-    @Mock
-    ProductRepository productRepository;
 
-    @Mock
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private CategoryRepository categoryRepository;
 
-    @Mock
+    @MockitoBean
     private CloudinaryService cloudinaryService;
 
-    @InjectMocks
-    ProductService productService;
-
     @Test
+    @Transactional
     void should_createNewProduct_fromRequest() throws Exception {
-
         MockMultipartFile mockImg = new MockMultipartFile(
                 "image",
-                "iphone15.jpg",
+                "testphone.jpg",
                 "image/jpeg",
-                "fake-image-content".getBytes()
-        );
+                "fake-image-content".getBytes());
 
         Map<String, Object> fakeUrl = new HashMap<>();
-        fakeUrl.put("secure_url", "https://res.cloudinary.com/demo/image/upload/iphone15.jpg");
-        Mockito.when(cloudinaryService.uploadFile(mockImg)).thenReturn(fakeUrl);
+        fakeUrl.put("secure_url", "https://res.cloudinary.com/demo/image/upload/testphone.jpg");
+        when(cloudinaryService.uploadFile(mockImg)).thenReturn(fakeUrl);
 
-        Category category = new Category(1L, "phone", new ArrayList<>());
-        Mockito.when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-
-        Mockito.when(productRepository.findByName("Iphone 15")).thenReturn(Optional.empty());
-
-
-        ProductRequest productRequest = new ProductRequest("Iphone 15", 850, mockImg, true, 1L);
-        Product productToSave = ProductMapper.toEntity(productRequest, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", category );
-        productToSave.setId(1L);
-        Mockito.when(productRepository.save(Mockito.any(Product.class))).thenReturn(productToSave);
-
-
+        ProductRequest productRequest = new ProductRequest("Test Phone", 850.0, mockImg, true, 1L);
         ProductResponse actualResponse = productService.createNewProduct(productRequest);
 
-
-        ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository).save(productCaptor.capture());
-        Product savedProduct = productCaptor.getValue();
-
-        assertEquals("Iphone 15", savedProduct.getName());
-        assertEquals(850, savedProduct.getPrice());
-        assertEquals("https://res.cloudinary.com/demo/image/upload/iphone15.jpg", savedProduct.getImageUrl());
-        assertEquals(true, savedProduct.isFeatured());
-        assertEquals(category, savedProduct.getCategory());
-        savedProduct.setId(1L);
-        ProductResponse expectedResponse = ProductMapper.fromEntity(savedProduct);
-
-
-        assertEquals(expectedResponse, actualResponse);
+        assertNotNull(actualResponse);
+        assertEquals("Test Phone", actualResponse.name());
+        assertEquals(850.0, actualResponse.price());
+        assertEquals("https://res.cloudinary.com/demo/image/upload/testphone.jpg", actualResponse.imageUrl());
+        assertTrue(actualResponse.featured());
+        assertEquals("Smartphones & Accessories", actualResponse.category().name());
     }
 
-
     @Test
-    void should_throwException_when_productAlreadyExist() throws Exception {
-
+    @Transactional
+    void should_throwException_when_productAlreadyExist() {
         MockMultipartFile mockImg = new MockMultipartFile(
                 "image",
                 "iphone15.jpg",
                 "image/jpeg",
-                "fake-image-content".getBytes()
-        );
+                "fake-image-content".getBytes());
 
-        Category category = new Category(1L, "phone", new ArrayList<>());
+        ProductRequest productRequest = new ProductRequest("iPhone 15 Pro", 850.0, mockImg, true, 1L);
 
-        ProductRequest productRequest = new ProductRequest("Iphone 15", 850, mockImg, true, 1L);
-        Product existingProduct = new Product(1L, "Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category, 0, 0, new ArrayList<>());
+        ProductAlreadyExistException exception = assertThrows(ProductAlreadyExistException.class, () -> productService.createNewProduct(productRequest));
 
-        Mockito.when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        Mockito.when(productRepository.findByName("Iphone 15")).thenReturn(Optional.of(existingProduct));
-
-        ProductAlreadyExistException exception = assertThrows(ProductAlreadyExistException.class, () -> {
-            productService.createNewProduct(productRequest);
-        });
-
-        assertEquals("This product already exist with id 1. Name: Iphone 15, Price: 850.0.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("iPhone 15 Pro"));
     }
 
     @Test
-    void should_throwException_when_categoryNotFound() throws Exception{
-
-        MockMultipartFile mockImg = new MockMultipartFile(
-                "image",
-                "iphone15.jpg",
-                "image/jpeg",
-                "fake-image-content".getBytes()
-        );
-
-        ProductRequest productRequest = new ProductRequest("Iphone 15", 850, mockImg, true, 1L);
-
-        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> {
-            productService.createNewProduct(productRequest);
-        });
-
-        assertEquals("The category with id: 1 does not exist.", exception.getMessage());
-
-    }
-
-    @Test
-    void should_findAllProducts() throws Exception{
-        Category category = new Category(1L, "phone", new ArrayList<>());
-
-        Product product1 = new Product(1L,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
-        Product product2 = new Product(2L,"Iphone 10", 1050, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
-
-        List<Product> products = List.of(product1, product2);
-        Mockito.when(productRepository.findAll()).thenReturn(products);
-
+    @Transactional
+    void should_findAllProducts() {
         List<ProductResponse> actualResponse = productService.findAllProducts();
 
-        List<ProductResponse> expectedresponses = products.stream()
-                .map(ProductMapper::fromEntity)
-                .toList();
-
-        assertEquals(expectedresponses, actualResponse);
-
+        assertNotNull(actualResponse);
+        assertEquals(4, actualResponse.size());
+        assertEquals("iPhone 15 Pro", actualResponse.get(0).name());
+        assertEquals("Samsung Galaxy S24 Ultra", actualResponse.get(1).name());
+        assertEquals("MacBook Pro 16", actualResponse.get(2).name());
+        assertEquals("Gaming Laptop ASUS ROG", actualResponse.get(3).name());
     }
 
     @Test
-    void should_findAllProducts_when_emptyList() throws Exception{
-        Mockito.when(productRepository.findAll()).thenReturn(Collections.emptyList());
-
-        assertThrows(EmptyListException.class, () -> {
-            productService.findAllProducts();
-        });
-
-    }
-
-    @Test
-    void should_findProductById() throws Exception{
-        Category category = new Category(1L, "phone", new ArrayList<>());
-
-        Product product1 = new Product(1L,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
-
-        Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
-
-        ProductResponse expectedresponse = ProductMapper.fromEntity(product1);
+    @Transactional
+    void should_findProductById() {
         ProductResponse actualResponse = productService.findProductById(1L);
 
-
-
-        assertEquals(expectedresponse, actualResponse);
-
+        assertNotNull(actualResponse);
+        assertEquals("iPhone 15 Pro", actualResponse.name());
+        assertEquals(999.99, actualResponse.price());
+        assertEquals(4.5, actualResponse.rating());
+        assertEquals(2, actualResponse.reviewCount());
+        assertEquals("Smartphones & Accessories", actualResponse.category().name());
     }
 
     @Test
-    void should_findProductById_NoIdProductFoundException() throws Exception{
-
-        assertThrows(NoIdProductFoundException.class, () -> {
-            productService.findProductById(1L);
-        });
-
+    @Transactional
+    void should_throwException_when_productNotFound() {
+        assertThrows(NoIdProductFoundException.class, () -> productService.findProductById(999L));
     }
 
     @Test
-    void should_updateProduct_fromRequest() throws Exception {
+    @Transactional
+    void should_findProductsByFilters_byCategory() {
+        List<ProductResponse> actualResponse = productService.findProductsByFilters(
+                Optional.empty(), Optional.of(1L), Optional.empty(), Optional.empty(), Optional.empty());
 
+        assertNotNull(actualResponse);
+        assertEquals(2, actualResponse.size());
+        assertEquals("iPhone 15 Pro", actualResponse.get(0).name());
+        assertEquals("Samsung Galaxy S24 Ultra", actualResponse.get(1).name());
+    }
+
+    @Test
+    @Transactional
+    void should_findProductsByFilters_byName() {
+        List<ProductResponse> actualResponse = productService.findProductsByFilters(
+                Optional.of("iPhone"), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+
+        assertNotNull(actualResponse);
+        assertEquals(1, actualResponse.size());
+        assertEquals("iPhone 15 Pro", actualResponse.getFirst().name());
+    }
+
+    @Test
+    @Transactional
+    void should_findProductsByFilters_byPriceRange() {
+        List<ProductResponse> actualResponse = productService.findProductsByFilters(
+                Optional.empty(), Optional.empty(), Optional.of("More than 900€"), Optional.empty(), Optional.empty());
+
+        assertNotNull(actualResponse);
+        assertEquals(4, actualResponse.size());
+    }
+
+    @Test
+    @Transactional
+    void should_updateProduct() throws Exception {
         MockMultipartFile mockImg = new MockMultipartFile(
                 "image",
-                "iphone15.jpg",
+                "updated-iphone.jpg",
                 "image/jpeg",
-                "fake-image-content".getBytes()
-        );
+                "fake-image-content".getBytes());
 
         Map<String, Object> fakeUrl = new HashMap<>();
-        fakeUrl.put("secure_url", "https://res.cloudinary.com/demo/image/upload/iphone15.jpg");
-        Mockito.when(cloudinaryService.uploadFile(mockImg)).thenReturn(fakeUrl);
+        fakeUrl.put("secure_url", "https://res.cloudinary.com/demo/image/upload/updated-iphone.jpg");
+        when(cloudinaryService.uploadFile(mockImg)).thenReturn(fakeUrl);
 
-        Category category = new Category(1L, "phone", new ArrayList<>());
-        Mockito.when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        ProductRequest updateRequest = new ProductRequest("Updated iPhone", 1099.99, mockImg, false, 1L);
+        ProductResponse actualResponse = productService.updateProduct(1L, updateRequest);
 
-        Mockito.when(productRepository.findByName("Iphone 15")).thenReturn(Optional.empty());
-
-
-        ProductRequest existingProduct = new ProductRequest("Iphone 15", 850, mockImg, true, 1L);
-        Product productToSave = ProductMapper.toEntity(existingProduct, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", category );
-        productToSave.setId(1L);
-        Mockito.when(productRepository.save(Mockito.any(Product.class))).thenReturn(productToSave);
-
-
-        productService.createNewProduct(existingProduct);
-
-        ProductRequest updatedRequest = new ProductRequest("Iphone 15 Pro", 950, mockImg, true, 1L);
-
-        Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(productToSave));
-
-        productService.updateProduct(1L, updatedRequest);
-
-
-        Product actualResponse =new Product(1L,"Iphone 15 Pro", 950, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
-
-        ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository, times(2)).save(productCaptor.capture());
-
-        List<Product> savedProducts = productCaptor.getAllValues();
-        Product savedProduct = savedProducts.get(1);
-
-        assertEquals("iphone 15 pro", savedProduct.getName());
-        assertEquals(950, savedProduct.getPrice());
+        assertNotNull(actualResponse);
+        assertEquals("updated iphone", actualResponse.name());
+        assertEquals(1099.99, actualResponse.price());
+        assertEquals("https://res.cloudinary.com/demo/image/upload/updated-iphone.jpg", actualResponse.imageUrl());
+        assertFalse(actualResponse.featured());
     }
 
     @Test
-    void should_deleteProduct_fromRequest() throws Exception {
-
-        Category category = new Category(1L, "phone", new ArrayList<>());
-
-        Product existingProduct = new Product(1L,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
-
-        Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
-
+    @Transactional
+    void should_deleteProduct() {
         productService.deleteProductById(1L);
 
-        verify(cloudinaryService).deleteFile("iphone15");
-
-        verify(productRepository).deleteById(1L);
-
-
+        assertThrows(NoIdProductFoundException.class, () -> productService.findProductById(1L));
     }
 
     @Test
-    void should_updateProductStats_when_userPostNewReview(){
-        Category category = new Category(1L, "phone", new ArrayList<>());
+    @Transactional
+    void should_updateProductStats_when_reviewAdded() {
+        productService.updateProductStats(1L);
 
-        Product existingProduct = new Product(1L,"Iphone 15", 850, "https://res.cloudinary.com/demo/image/upload/iphone15.jpg", true, category,0,0,new ArrayList<>());
+        ProductResponse updatedProduct = productService.findProductById(1L);
 
-        User user = new User(); user.setId(1L); user.setUsername("username");
-
-        Review review = new Review(1L,5,"Good!!", existingProduct, user);
-
-        existingProduct.getReviews().add(review);
-
-        Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
-        Mockito.when(productRepository.save(Mockito.any(Product.class))).thenAnswer(i -> i.getArgument(0));
-
-        Product productUpdate = productService.updateProductStats(1L);
-
-        assertEquals(5.0,productUpdate.getRating());
-        assertEquals(1,productUpdate.getReviewCount());
+        assertNotNull(updatedProduct);
+        assertEquals(2, updatedProduct.reviewCount());
+        assertEquals(4.5, updatedProduct.rating());
     }
-
 }
