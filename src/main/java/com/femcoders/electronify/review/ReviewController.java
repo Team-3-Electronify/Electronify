@@ -60,8 +60,7 @@ public class ReviewController {
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
-            }
-    )
+            })
     public ResponseEntity<ReviewResponse> postNewReview(@Valid @RequestBody ReviewRequest reviewRequest) {
         ReviewResponse newReview = reviewService.createReview(reviewRequest);
         return new ResponseEntity<>(newReview, HttpStatus.CREATED);

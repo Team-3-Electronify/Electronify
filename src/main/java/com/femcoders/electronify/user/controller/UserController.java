@@ -6,8 +6,6 @@ import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
 import com.femcoders.electronify.user.dto.UserWithReviewsResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,7 +26,7 @@ public class UserController {
     @GetMapping
     @Operation(summary = "Get all users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return  ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
