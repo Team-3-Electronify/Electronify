@@ -2,6 +2,7 @@ package com.femcoders.electronify.product;
 
 import com.femcoders.electronify.category.Category;
 import com.femcoders.electronify.category.CategoryRepository;
+import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.cloudinary.CloudinaryService;
 import com.femcoders.electronify.exceptions.EmptyListException;
 import com.femcoders.electronify.product.dto.ProductMapper;
@@ -34,22 +35,19 @@ public class ProductService {
     @Transactional
     public List<ProductResponse> findAllProducts(){
         List<Product> products = productRepository.findAll();
-        if (products.isEmpty()){
-            throw new EmptyListException();
-        }
+        checkEmptyList(products);
 
-        return products.stream()
-                .map(product -> ProductMapper.fromEntity(product))
-                .toList();
+        return getProductResponseList(products);
     }
 
     @Transactional
     public ProductResponse findProductById(Long id){
-        Product productById = productRepository.findById(id)
-                .orElseThrow(() -> new NoIdProductFoundException(id));
+        Product productById = getProductById(id);
 
         return ProductMapper.fromEntity(productById);
     }
+
+
 
     @Transactional
     public List<ProductResponse> findProductsByFilters(
@@ -74,35 +72,21 @@ public class ProductService {
 
         List<Order> orderList = new ArrayList<>();
 
-        sortByPrice.ifPresent(order -> {
-            if (order.equalsIgnoreCase("asc")) {
-                orderList.add(cBuilder.asc(productRoot.get("price")));
-            } else if (order.equalsIgnoreCase("desc")) {
-                orderList.add(cBuilder.desc(productRoot.get("price")));
-            }
-        });
+        sortProducts(sortByPrice, orderList, cBuilder, productRoot, "price");
 
-        sortByRating.ifPresent(order -> {
-            if (order.equalsIgnoreCase("asc")) {
-                orderList.add(cBuilder.asc(productRoot.get("rating")));
-            } else if (order.equalsIgnoreCase("desc")) {
-                orderList.add(cBuilder.desc(productRoot.get("rating")));
-            }
-        });
+        sortProducts(sortByRating, orderList, cBuilder, productRoot, "rating");
 
         if (!orderList.isEmpty()) {
             cQuery.orderBy(orderList);
         }
 
         List<Product> products = entityManager.createQuery(cQuery).getResultList();
-        if (products.isEmpty()) {
-            throw new EmptyListException();
-        }
-        return products.stream()
-                .map(product -> ProductMapper.fromEntity(product))
-                .toList();
+        checkEmptyList(products);
+        return getProductResponseList(products);
 
     }
+
+
 
     private void filterByName(Optional<String> productName, CriteriaBuilder cBuilder, Root<Product> productRoot, List<Predicate> predicates) {
         productName.filter(n -> !n.trim().isEmpty())
@@ -123,7 +107,7 @@ public class ProductService {
     @Transactional
     private Predicate createPricePredicate(CriteriaBuilder cBuilder, Path<Double> pricePath, String priceGroup) {
         switch (priceGroup) {
-            case "Less than 50 €":
+            case "Less than 50€":
                 return cBuilder.lessThan(pricePath, 50.0);
             case "50€ - 150€":
                 return cBuilder.between(pricePath, 50.0, 150.0);
@@ -143,7 +127,7 @@ public class ProductService {
     @Transactional
     public ProductResponse createNewProduct(ProductRequest productRequest) throws IOException {
         Category isExistingCategory = categoryRepository.findById(productRequest.categoryId())
-                .orElseThrow(() -> new RuntimeException("NO id category found"));
+                .orElseThrow(() -> new CategoryNotFoundException(productRequest.categoryId()));
         Optional<Product> isExistingProduct = productRepository.findByName(productRequest.name());
         if (isExistingProduct.isPresent()){
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
@@ -166,49 +150,37 @@ public class ProductService {
             throw new ProductAlreadyExistException(isExistingProduct.get().getName(),isExistingProduct.get().getPrice(), isExistingProduct.get().getId());
         }
 
-        Product productById = productRepository.findById(id)
-                .orElseThrow(() -> new NoIdProductFoundException(id));
+        Product productById = getProductById(id);
 
         productById.setName(productRequest.name().toLowerCase());
         productById.setPrice(productRequest.price());
         productById.setFeatured(productRequest.featured());
         productById.setCategory(isExistingCategory);
-        try {
-            Map uploadResult = cloudinaryService.uploadFile(productRequest.image());
-            String imageUrl = (String) uploadResult.get("secure_url");
-            productById.setImageUrl(imageUrl);
-        } catch (Exception e) {
-            throw new RuntimeException("Error uploading image to Cloudinary", e);
-        }
+        postImageCloudinary(productRequest, productById);
 
         productRepository.save(productById);
         return ProductMapper.fromEntity(productById);
     }
 
+
+
     public Product updateProductStats(Long idProduct){
-        Product isExisting = productRepository.findById(idProduct)
-                .orElseThrow(() -> new NoIdProductFoundException(idProduct));
+        Product isExisting = getProductById(idProduct);
 
         List<Review> reviews = isExisting.getReviews();
 
         int updatedReviewCount = reviews.size();
-        double averageRating = reviews.stream()
-                .mapToDouble(pr -> pr.getRating())
-                .average()
-                .orElse(0.0);
-
-        averageRating = Math.round(averageRating * 100.0) / 100.0;
-
+        double averageRating = getAverageRating(reviews);
         isExisting.setReviewCount(updatedReviewCount);
         isExisting.setRating(averageRating);
 
         return productRepository.save(isExisting);
     }
 
+
     @Transactional
     public void deleteProductById(Long id){
-        Product isExisting = productRepository.findById(id)
-                .orElseThrow(() -> new NoIdProductFoundException(id));
+        Product isExisting = getProductById(id);
         String imageUrl = isExisting.getImageUrl();
 
         String withoutPrefix = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
@@ -219,13 +191,67 @@ public class ProductService {
         String publicId = (dotIndex != -1) ? withoutPrefix.substring(0, dotIndex) : withoutPrefix;
 
 
+        deleteImageCloudinary(publicId);
+
+        productRepository.deleteById(id);
+    }
+
+
+    private Product getProductById(Long id) {
+        Product productById = productRepository.findById(id)
+                .orElseThrow(() -> new NoIdProductFoundException(id));
+        return productById;
+    }
+
+    private static void sortProducts(Optional<String> sortBy, List<Order> orderList, CriteriaBuilder cBuilder, Root<Product> productRoot, String atribute) {
+        sortBy.ifPresent(order -> {
+            if (order.equalsIgnoreCase("asc")) {
+                orderList.add(cBuilder.asc(productRoot.get(atribute)));
+            } else if (order.equalsIgnoreCase("desc")) {
+                orderList.add(cBuilder.desc(productRoot.get(atribute)));
+            }
+        });
+    }
+
+    private static double getAverageRating(List<Review> reviews) {
+        return Math.round(
+                reviews.stream()
+                .mapToDouble(pr -> pr.getRating())
+                .average()
+                .orElse(0.0)
+                        * 100.0) / 100.0;
+    }
+
+    private void postImageCloudinary(ProductRequest productRequest, Product productById) {
+        try {
+            Map uploadResult = cloudinaryService.uploadFile(productRequest.image());
+            String imageUrl = (String) uploadResult.get("secure_url");
+            productById.setImageUrl(imageUrl);
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading image to Cloudinary", e);
+        }
+    }
+
+    private void deleteImageCloudinary(String publicId) {
         try {
             cloudinaryService.deleteFile(publicId);
         } catch (IOException e) {
             throw new RuntimeException("Error deleting image from Cloudinary: " + e.getMessage());
         }
-
-        productRepository.deleteById(id);
     }
 
+    private static List<ProductResponse> getProductResponseList(List<Product> products) {
+        return products.stream()
+                .map(product -> ProductMapper.fromEntity(product))
+                .toList();
+    }
+
+    private static void checkEmptyList(List<Product> products) {
+        if (products.isEmpty()){
+            throw new EmptyListException();
+        }
+    }
+    
+    
+    
 }

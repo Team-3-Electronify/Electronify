@@ -8,6 +8,5 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record ReviewRequest(@NotNull(message = "Rating is required") @PositiveOrZero(message = "Rating must be positive or zero")
                             @Max(value = 5, message = "Rating cannot be greater than 5") double rating,
                             @NotBlank(message = "Review text is required") String body,
-                            @NotNull(message = "Product ID is required") Long productId,
-                            @NotNull(message = "User ID is required") Long userId) {
+                            @NotNull(message = "Product ID is required") Long productId) {
 }
