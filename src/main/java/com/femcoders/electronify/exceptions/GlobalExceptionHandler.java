@@ -6,9 +6,11 @@ import com.femcoders.electronify.category.exceptions.CategoryAlreadyExistExcepti
 import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
 import com.femcoders.electronify.product.exceptions.NoIdProductFoundException;
 import com.femcoders.electronify.product.exceptions.ProductAlreadyExistException;
+import com.femcoders.electronify.swagger.ErrorResponse;
 import com.femcoders.electronify.user.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -30,8 +32,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<String> handleCartNotFoundException(CartNotFoundException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleCartNotFoundException(CartNotFoundException e) {
+        ErrorResponse error = new ErrorResponse();
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setMessage(e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ItemNotFoundException.class)
