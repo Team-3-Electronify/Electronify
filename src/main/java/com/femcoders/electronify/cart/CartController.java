@@ -21,7 +21,7 @@ public class CartController {
     @Operation(summary = "Get all products in a cart by user",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cart by username returned"),
-                    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+                    @ApiResponse(responseCode = "404", ref = "#/components/responses/CartNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             }
     )
@@ -33,11 +33,10 @@ public class CartController {
     @Operation(summary = "Add new product in a user cart",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Product added to cart successfully"),
-                    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+                    @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
-            }
-    )
+            })
     public ResponseEntity<CartResponse> addToCart(
             @PathVariable Long productId,
             @RequestBody CartRequest request) {
@@ -51,8 +50,7 @@ public class CartController {
                     @ApiResponse(responseCode = "200", description = "Cart updated successfully"),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
-            }
-    )
+            })
     public ResponseEntity<CartResponse> updateCartItem(
             @PathVariable Long productId,
             @RequestBody CartRequest request) {
@@ -65,10 +63,9 @@ public class CartController {
             summary = "Delete product in cart by user",
             responses = {
                     @ApiResponse(responseCode = "204", ref = "#/components/responses/NoContent"),
-                    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+                    @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
-            }
-    )
+            })
     public ResponseEntity<Void> removeFromCart(@PathVariable Long productId) {
         cartService.removeFromCart(productId);
         return ResponseEntity.noContent().build();
