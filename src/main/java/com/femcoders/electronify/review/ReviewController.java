@@ -4,6 +4,7 @@ import com.femcoders.electronify.review.dto.ReviewRequest;
 import com.femcoders.electronify.review.dto.ReviewResponse;
 import com.femcoders.electronify.swagger.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,7 +35,7 @@ public class ReviewController {
                                     schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<List<ReviewResponse>> getReviewsByUserIdList(@RequestParam Long userId) {
+    public ResponseEntity<List<ReviewResponse>> getReviewsByUserIdList(@Parameter(description = "Reviews post by a user ID") @RequestParam Long userId) {
         List<ReviewResponse> reviews = reviewService.getReviewsByUserId(userId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
@@ -48,7 +49,7 @@ public class ReviewController {
                                     schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<List<ReviewResponse>> getReviewsByProductIdList(@RequestParam Long productId) {
+    public ResponseEntity<List<ReviewResponse>> getReviewsByProductIdList(@Parameter(description = "Reviews post by a product ID") @RequestParam Long productId) {
         List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }

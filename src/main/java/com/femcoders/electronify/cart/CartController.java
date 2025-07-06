@@ -3,6 +3,7 @@ package com.femcoders.electronify.cart;
 import com.femcoders.electronify.cart.dto.CartRequest;
 import com.femcoders.electronify.cart.dto.CartResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,8 @@ public class CartController {
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
     public ResponseEntity<CartResponse> addToCart(
-            @PathVariable Long productId,
-            @RequestBody CartRequest request) {
+            @Parameter(description = "Product ID you want to add to the cart") @PathVariable Long productId,
+            @Parameter(description = "Quantity of products you want to add to your cart") @RequestBody CartRequest request) {
         CartResponse cartResponse = cartService.addToCart(productId, request.quantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
     }
@@ -52,8 +53,8 @@ public class CartController {
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
     public ResponseEntity<CartResponse> updateCartItem(
-            @PathVariable Long productId,
-            @RequestBody CartRequest request) {
+            @Parameter(description = "Product ID you want to update") @PathVariable Long productId,
+            @Parameter(description = "Update quantity of products you want to add to your cart") @RequestBody CartRequest request) {
         CartResponse updatedCart = cartService.updateCartItemQuantity(productId, request.quantity());
         return ResponseEntity.ok(updatedCart);
     }
@@ -66,7 +67,7 @@ public class CartController {
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<Void> removeFromCart(@PathVariable Long productId) {
+    public ResponseEntity<Void> removeFromCart(@Parameter(description = "Product ID you want to delete to your cart") @PathVariable Long productId) {
         cartService.removeFromCart(productId);
         return ResponseEntity.noContent().build();
     }

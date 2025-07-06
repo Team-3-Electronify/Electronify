@@ -3,6 +3,7 @@ package com.femcoders.electronify.product;
 import com.femcoders.electronify.product.dto.ProductRequest;
 import com.femcoders.electronify.product.dto.ProductResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,7 +45,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getProductById(@Parameter(description = "Product ID") @PathVariable Long id) {
         ProductResponse product = productService.findProductById(id);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
@@ -56,11 +57,11 @@ public class ProductController {
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<List<ProductResponse>> getProductsByFilters(@RequestParam Optional<String> name,
-                                                                      @RequestParam Optional<Long> categoryId,
-                                                                      @RequestParam Optional<String> priceGroup,
-                                                                      @RequestParam Optional<String> sortByPrice,
-                                                                      @RequestParam Optional<String> sortByRating) {
+    public ResponseEntity<List<ProductResponse>> getProductsByFilters(@Parameter(description = "Product name Ex. Apple") @RequestParam Optional<String> name,
+                                                                      @Parameter(description = "Category ID Ex. 1") @RequestParam Optional<Long> categoryId,
+                                                                      @Parameter(description = "Price group Ex. 300€ - 600€") @RequestParam Optional<String> priceGroup,
+                                                                      @Parameter(description = "Sort products by price ascending or descending Ex. asc") @RequestParam Optional<String> sortByPrice,
+                                                                      @Parameter(description = "Sort products by rating ascending or descending Ex. desc") @RequestParam Optional<String> sortByRating) {
         List<ProductResponse> products = productService.findProductsByFilters(name, categoryId, priceGroup, sortByPrice, sortByRating);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
@@ -90,7 +91,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<ProductResponse> updateProductById(@PathVariable Long id, @Valid @ModelAttribute ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> updateProductById(@Parameter(description = "Product ID to update")@PathVariable Long id, @Valid @ModelAttribute ProductRequest productRequest) {
         try {
             ProductResponse updatedProduct = productService.updateProduct(id, productRequest);
             return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
@@ -105,7 +106,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/ProductNotFound"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             })
-    public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
+    public ResponseEntity<String> deleteProductById(@Parameter(description = "Product ID to delete") @PathVariable Long id) {
         productService.deleteProductById(id);
         return new ResponseEntity<>("Product with id " + id + " has been deleted", HttpStatus.NO_CONTENT);
     }
