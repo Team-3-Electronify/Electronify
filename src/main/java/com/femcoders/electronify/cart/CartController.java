@@ -100,7 +100,43 @@ public class CartController {
     }
 
     @PutMapping("/update/{productId}")
-    @Operation(summary = "Update product in cart by user")
+    @Operation(
+            summary = "Update product quantity in cart by user",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Cart updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CartResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Product not found in cart",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid request data",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal server error",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    )
+            }
+    )
     public ResponseEntity<CartResponse> updateCartItem(
             @PathVariable Long productId,
             @RequestBody CartRequest request) {
@@ -109,9 +145,34 @@ public class CartController {
     }
 
     @DeleteMapping("/remove/{productId}")
-    @Operation(summary = "Delete product in cart by user")
+    @Operation(
+            summary = "Delete product in cart by user",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Product successfully removed from cart",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Product not found in cart",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal server error",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
+                    )
+            }
+    )
     public ResponseEntity<Void> removeFromCart(@PathVariable Long productId) {
         cartService.removeFromCart(productId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
