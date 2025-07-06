@@ -45,6 +45,22 @@ public class SwaggerConfig {
                                 .description("Requested resource not found")
                                 .content(jsonError()))
 
+                        .addResponses("CartNotFound", new ApiResponse()
+                                .description("Cart for user not found.")
+                                .content(jsonError()))
+
+                        .addResponses("ProductNotFound", new ApiResponse()
+                                .description("Product not found.")
+                                .content(jsonError()))
+
+                        .addResponses("CategoryNotFound", new ApiResponse()
+                                .description("Category not found.")
+                                .content(jsonError()))
+
+                        .addResponses("UserNotFound", new ApiResponse()
+                                .description("User not found.")
+                                .content(jsonError()))
+
                         .addResponses("InternalServerError", new ApiResponse()
                                 .description("Internal server error")
                                 .content(jsonError()))

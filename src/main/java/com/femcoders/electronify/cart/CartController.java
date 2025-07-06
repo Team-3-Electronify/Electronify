@@ -33,7 +33,7 @@ public class CartController {
     @Operation(summary = "Add new product in a user cart",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Product added to cart successfully"),
-                    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+                    @ApiResponse(responseCode = "404", ref = "#/components/responses/CartNotFound"),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
             }
