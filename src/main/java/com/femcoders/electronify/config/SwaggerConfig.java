@@ -11,6 +11,8 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.Map;
+
 @Configuration
 public class SwaggerConfig {
     @Bean
@@ -31,47 +33,51 @@ public class SwaggerConfig {
                         )
                         .addResponses("BadRequest", new ApiResponse()
                                 .description("Invalid input or malformed request")
-                                .content(jsonError()))
+                                .content(jsonError(400, "Invalid input or malformed request")))
 
                         .addResponses("Unauthorized", new ApiResponse()
                                 .description("Authentication required")
-                                .content(jsonError()))
+                                .content(jsonError(401, "Authentication required")))
 
                         .addResponses("Forbidden", new ApiResponse()
                                 .description("You do not have permission to access this resource")
-                                .content(jsonError()))
+                                .content(jsonError(403, "You do not have permission to access this resource")))
 
                         .addResponses("NotFound", new ApiResponse()
                                 .description("Requested resource not found")
-                                .content(jsonError()))
+                                .content(jsonError(404,"Requested resource not found")))
 
                         .addResponses("CartNotFound", new ApiResponse()
                                 .description("Cart for user not found.")
-                                .content(jsonError()))
+                                .content(jsonError(404,"Cart for user not found.")))
 
                         .addResponses("ProductNotFound", new ApiResponse()
                                 .description("Product not found.")
-                                .content(jsonError()))
+                                .content(jsonError(404, "Product not found.")))
 
                         .addResponses("CategoryNotFound", new ApiResponse()
                                 .description("Category not found.")
-                                .content(jsonError()))
+                                .content(jsonError(404, "Category not found.")))
 
                         .addResponses("UserNotFound", new ApiResponse()
                                 .description("User not found.")
-                                .content(jsonError()))
+                                .content(jsonError(404, "User not found.")))
 
                         .addResponses("InternalServerError", new ApiResponse()
                                 .description("Internal server error")
-                                .content(jsonError()))
+                                .content(jsonError(500, "Internal server error")))
 
                         .addResponses("NoContent", new ApiResponse()
                                 .description("Successfully processed request with no content"))
                 );
     }
 
-    private Content jsonError() {
+    private Content jsonError(int status, String message) {
         return new Content().addMediaType("application/json",
-                new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")));
+                new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))
+                        .example(Map.of(
+                                "status", status,
+                                "message", message
+                        )));
     }
 }
