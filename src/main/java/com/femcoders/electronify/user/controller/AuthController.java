@@ -4,6 +4,7 @@ import com.femcoders.electronify.user.UserService;
 import com.femcoders.electronify.user.dto.UserRequest;
 import com.femcoders.electronify.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,12 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
-    @Operation(summary = "Post a new user register")
+    @Operation(summary = "Post a new user register",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "User registered successfully"),
+                    @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+                    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
+            })
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest request) {
         try {
@@ -41,7 +47,13 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Post a new user login")
+    @Operation(summary = "Post a new user login",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login successful"),
+                    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+                    @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+                    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
+            })
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         try {
