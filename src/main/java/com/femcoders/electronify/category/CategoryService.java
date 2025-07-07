@@ -1,0 +1,64 @@
+package com.femcoders.electronify.category;
+
+import com.femcoders.electronify.category.dto.CategoryMapper;
+import com.femcoders.electronify.category.dto.CategoryRequest;
+import com.femcoders.electronify.category.dto.CategoryResponse;
+import com.femcoders.electronify.category.dto.CategoryWithProductsResponse;
+import com.femcoders.electronify.category.exceptions.CategoryAlreadyExistException;
+import com.femcoders.electronify.category.exceptions.CategoryNotFoundException;
+import com.femcoders.electronify.exceptions.EmptyListException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class CategoryService {
+    private final CategoryRepository categoryRepository;
+
+    public List<CategoryResponse> getAllCategories(){
+        List<Category> categories = categoryRepository.findAll();
+        if (categories.isEmpty()){
+            throw new EmptyListException();
+        }
+        return categories.stream()
+                .map(category -> CategoryMapper.fromEntity(category))
+                .toList();
+    }
+
+    public CategoryWithProductsResponse findCategoryById(Long id){
+        Category categoryById = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
+        return CategoryMapper.toCategoryWithProducts(categoryById);
+    }
+
+    public CategoryResponse createNewCategory(CategoryRequest categoryRequest){
+        Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
+        if (isExistingCategory.isPresent()){
+            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());
+        }
+        Category newCategory = CategoryMapper.toEntity(categoryRequest);
+        Category savedCategory = categoryRepository.save(newCategory);
+        return CategoryMapper.fromEntity(savedCategory);
+    }
+
+    public CategoryResponse updateCategory(Long idCategory, CategoryRequest categoryRequest){
+        Category isExisting = categoryRepository.findById(idCategory)
+                .orElseThrow(() -> new CategoryNotFoundException(idCategory));
+        Optional<Category> isExistingCategory = categoryRepository.findByName(categoryRequest.name());
+        if (isExistingCategory.isPresent()){
+            throw new CategoryAlreadyExistException(isExistingCategory.get().getName(), isExistingCategory.get().getId());
+        }
+        isExisting.setName(categoryRequest.name());
+        Category savedCategory = categoryRepository.save(isExisting);
+        return CategoryMapper.fromEntity(savedCategory);
+    }
+
+    public void deleteCategoryById(Long id){
+        Category isExisting = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
+        categoryRepository.deleteById(id);
+    }
+}
