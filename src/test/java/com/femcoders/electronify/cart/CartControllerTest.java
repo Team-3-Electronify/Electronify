@@ -81,7 +81,7 @@ class CartControllerTest {
     @Test
     void removeFromCartTest() throws  Exception {
         mockMvc.perform(delete("/api/cart/remove/{productId}", productId))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Mockito.verify(cartService).removeFromCart(productId);
     }
